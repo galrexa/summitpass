@@ -12,51 +12,49 @@ class Mountain extends Model
     protected $fillable = [
         'name',
         'location',
+        'province',
         'height_mdpl',
         'difficulty',
-        'min_level',
-        'base_price',
-        'max_days',
         'description',
         'image_url',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     /**
      * Relationships
      */
 
-    public function basecamps()
+    public function regulation()
     {
-        return $this->hasMany(Basecamp::class);
+        return $this->hasOne(MountainRegulation::class);
     }
 
-    public function checkpoints()
+    public function trails()
     {
-        return $this->hasMany(Checkpoint::class);
+        return $this->hasMany(Trail::class);
     }
 
-    public function trips()
+    public function bookings()
     {
-        return $this->hasMany(Trip::class);
+        return $this->hasMany(Booking::class);
     }
 
     /**
      * Scopes
      */
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public function scopeByDifficulty($query, $difficulty)
     {
         return $query->where('difficulty', $difficulty);
-    }
-
-    public function scopeByMinLevel($query, $level)
-    {
-        return $query->where('min_level', '<=', $level);
-    }
-
-    public function scopeByPriceRange($query, $minPrice, $maxPrice)
-    {
-        return $query->whereBetween('base_price', [$minPrice, $maxPrice]);
     }
 
     public function scopeSearch($query, $search)
@@ -68,11 +66,6 @@ class Mountain extends Model
     /**
      * Accessors
      */
-
-    public function getFormattedPriceAttribute()
-    {
-        return 'Rp' . number_format($this->base_price, 0, ',', '.');
-    }
 
     public function getFormattedHeightAttribute()
     {

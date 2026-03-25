@@ -1,76 +1,88 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MountainController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\TripController;
-use App\Http\Controllers\CheckpointController;
+use App\Http\Controllers\TrekkingLogController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\QrPassController;
+use App\Http\Controllers\SystemSettingController;
+use App\Http\Controllers\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes - SummitPass v1
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group.
-|
 */
 
 Route::prefix('v1')->group(function () {
-    
-    // Authentication Routes (Public)
+
+    // ── Auth (Public) ────────────────────────────────────────────────────
     Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/login',    [AuthController::class, 'login']);
 
-    // Protected Routes
+    // ── Protected ────────────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
-        
+
         // Auth
-        Route::get('/auth/profile', [AuthController::class, 'profile']);
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::get('/auth/profile',  [AuthController::class, 'profile']);
+        Route::post('/auth/logout',  [AuthController::class, 'logout']);
         Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-        Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/auth/profile',  [AuthController::class, 'updateProfile']);
 
-        // Mountains (Public viewing)
-        Route::get('/mountains', [MountainController::class, 'index']);
+        // ── Mountains (semua role) ────────────────────────────────────────
+        Route::get('/mountains',      [MountainController::class, 'index']);
         Route::get('/mountains/{id}', [MountainController::class, 'show']);
-        Route::get('/mountains/{mountainId}/basecamps', [MountainController::class, 'getBasecamps']);
-        Route::get('/mountains/{mountainId}/checkpoints', [MountainController::class, 'getCheckpoints']);
 
-        // Mountains Admin
-        Route::post('/mountains', [MountainController::class, 'store']);
-        Route::put('/mountains/{id}', [MountainController::class, 'update']);
-        Route::delete('/mountains/{id}', [MountainController::class, 'destroy']);
+        // Jalur & pos per gunung
+        Route::get('/mountains/{mountainId}/trails',                                   [MountainController::class, 'getTrails']);
+        Route::get('/mountains/{mountainId}/trails/{trailId}/checkpoints',             [MountainController::class, 'getCheckpoints']);
+        Route::get('/mountains/{mountainId}/trails/{trailId}/available-dates',         [BookingController::class, 'getAvailableDates']);
 
-        // Bookings
-        Route::get('/bookings', [BookingController::class, 'index']);
-        Route::get('/bookings/{id}', [BookingController::class, 'show']);
-        Route::post('/bookings', [BookingController::class, 'store']);
-        Route::delete('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+        // ── Bookings (SIMAKSI Digital) ────────────────────────────────────
+        Route::get('/bookings',              [BookingController::class, 'index']);
+        Route::get('/bookings/{id}',         [BookingController::class, 'show']);
+        Route::post('/bookings',             [BookingController::class, 'store']);
+        Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
 
-        // Booking Helpers
-        Route::get('/mountains/{mountainId}/available-dates', [BookingController::class, 'getAvailableDates']);
-        Route::get('/mountains/{mountainId}/operators', [BookingController::class, 'getOperators']);
+        // ── Payment (Langkah 5 — dummy) ───────────────────────────────────
+        Route::post('/bookings/{id}/payment',         [PaymentController::class, 'initiate']);
+        Route::post('/bookings/{id}/payment/confirm', [PaymentController::class, 'confirmDummy']);
+        Route::get('/bookings/{id}/payment',          [PaymentController::class, 'status']);
 
-        // Trips (Active Trips)
-        Route::get('/trips', [TripController::class, 'index']);
-        Route::get('/trips/{id}', [TripController::class, 'show']);
-        Route::get('/trips/{id}/checkpoints', [TripController::class, 'getCheckpoints']);
-        Route::get('/trips/{id}/logs', [TripController::class, 'getCheckpointLogs']);
+        // ── QR Pass (Langkah 4 — klaim & tampil QR) ──────────────────────
+        Route::post('/qr-passes/claim',       [QrPassController::class, 'claim']);
+        Route::get('/qr-passes',              [QrPassController::class, 'myPasses']);
+        Route::get('/qr-passes/{qrToken}',    [QrPassController::class, 'show']);
 
-        // Checkpoints
-        Route::post('/checkpoints/log', [CheckpointController::class, 'logCheckpoint']);
-        Route::get('/checkpoints/log/{id}', [CheckpointController::class, 'show']);
+        // ── Admin only ────────────────────────────────────────────────────
+        Route::middleware('role:admin')->group(function () {
+
+            // User Management
+            Route::get('/admin/users',             [AdminUserController::class, 'index']);
+            Route::post('/admin/users',            [AdminUserController::class, 'store']);
+            Route::get('/admin/users/{id}',        [AdminUserController::class, 'show']);
+            Route::patch('/admin/users/{id}/role', [AdminUserController::class, 'updateRole']);
+            Route::delete('/admin/users/{id}',     [AdminUserController::class, 'destroy']);
+
+            // System Settings & Anomaly
+            Route::get('/admin/settings',          [SystemSettingController::class, 'index']);
+            Route::put('/admin/settings/{key}',    [SystemSettingController::class, 'update']);
+            Route::post('/admin/anomaly/run',      [SystemSettingController::class, 'runAnomalyCheck']);
+
+            // Mountain management (hanya admin)
+            Route::post('/mountains',              [MountainController::class, 'store']);
+            Route::put('/mountains/{id}',          [MountainController::class, 'update']);
+            Route::delete('/mountains/{id}',       [MountainController::class, 'destroy']);
+        });
+
+        // ── Trekking Log (Scan QR di pos) ────────────────────────────────
+        Route::post('/trekking/scan',              [TrekkingLogController::class, 'scan']);
+        Route::get('/trekking/history/{qrToken}',  [TrekkingLogController::class, 'history']);
+        Route::get('/trekking/logs/{id}',          [TrekkingLogController::class, 'show']);
     });
 });
 
-// Health check (for monitoring)
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'healthy',
-        'timestamp' => now(),
-    ]);
-});
+// Health check
+Route::get('/health', fn () => response()->json(['status' => 'healthy', 'timestamp' => now()]));

@@ -16,15 +16,14 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();
+            $table->string('nik', 16)->unique()->nullable()->comment('NIK KTP untuk WNI');
+            $table->string('passport_number', 20)->unique()->nullable()->comment('Nomor paspor untuk WNA');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['hiker', 'operator', 'sar', 'admin'])->default('hiker');
-            $table->integer('level')->default(1);
+            $table->enum('role', ['pendaki', 'pengelola_tn', 'admin', 'officer'])->default('pendaki');
             $table->rememberToken();
             $table->timestamps();
 
-            // Indexes
-            $table->index('email');
             $table->index('role');
         });
     }

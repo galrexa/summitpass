@@ -6,30 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('basecamps', function (Blueprint $table) {
+        Schema::create('trails', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mountain_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mountain_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->integer('route_order');
+            $table->integer('route_order')->default(1);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            // Indexes
-            $table->index('mountain_id');
             $table->unique(['mountain_id', 'route_order']);
+            $table->index('mountain_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('basecamps');
+        Schema::dropIfExists('trails');
     }
 };

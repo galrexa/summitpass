@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer require:*)",
+      "Bash(php composer.phar require dedoc/scramble --dev)",
+      "Bash(where composer:*)",
+      "Bash(php -r \"echo PHP_EOL;\")",
+      "Bash(where php:*)",
+      "Bash(where composer.bat)",
+      "Bash(dir \"C:\\\\ProgramData\\\\ComposerSetup\\\\bin\")",
+      "Bash(\"C:\\\\ProgramData\\\\ComposerSetup\\\\bin\\\\composer\" require:*)"
+    ]
+  }
+}

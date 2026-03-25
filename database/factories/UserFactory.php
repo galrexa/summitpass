@@ -12,34 +12,59 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name'              => fake()->name(),
+            'email'             => fake()->unique()->safeEmail(),
+            'phone'             => fake()->phoneNumber(),
+            'nik'               => fake()->unique()->numerify('################'), // 16 digit
+            'passport_number'   => null,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'password'          => static::$password ??= Hash::make('password'),
+            'role'              => 'pendaki',
+            'remember_token'    => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function pengelolaTn(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'pengelola_tn',
+            'nik'  => null,
+        ]);
+    }
+
+    public function officer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'officer',
+            'nik'  => null,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+            'nik'  => null,
+        ]);
+    }
+
+    public function wna(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nik'             => null,
+            'passport_number' => strtoupper(fake()->bothify('??#######')),
         ]);
     }
 }
