@@ -18,7 +18,11 @@ class EnsureRole
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!$request->user() || !in_array($request->user()->role, $roles)) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Akses ditolak'], 403);
+            }
+
+            abort(403, 'Akses ditolak. Halaman ini hanya untuk ' . implode(' / ', $roles) . '.');
         }
 
         return $next($request);

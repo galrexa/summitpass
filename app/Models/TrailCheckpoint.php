@@ -19,6 +19,7 @@ class TrailCheckpoint extends Model
         'latitude',
         'longitude',
         'altitude',
+        'estimated_duration_minutes',
     ];
 
     protected $casts = [

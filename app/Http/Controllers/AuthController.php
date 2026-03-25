@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -51,8 +52,159 @@ class AuthController extends Controller
         ], 201);
     }
 
+    private function redirectAfterLogin()
+    {
+        $role = Auth::user()->role;
+        if (in_array($role, ['admin', 'pengelola_tn'])) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('dashboard');
+    }
+
     /**
-     * User login
+     * Show registration form (web)
+     */
+    public function showRegister()
+    {
+        if (Auth::check()) {
+            return $this->redirectAfterLogin();
+        }
+
+        return view('auth.register');
+    }
+
+    /**
+     * Handle web registration form submission
+     */
+    public function webRegister(Request $request)
+    {
+        $validated = $request->validate([
+            'name'            => 'required|string|max:255',
+            'email'           => 'required|string|email|max:255|unique:users',
+            'phone'           => 'nullable|string|max:20',
+            'nik'             => 'nullable|string|size:16|unique:users|regex:/^[0-9]{16}$/',
+            'passport_number' => 'nullable|string|max:20|unique:users',
+            'password'        => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        if (empty($validated['nik']) && empty($validated['passport_number'])) {
+            return back()
+                ->withInput()
+                ->withErrors(['nik' => 'NIK atau nomor paspor wajib diisi.']);
+        }
+
+        $user = User::create([
+            'name'            => $validated['name'],
+            'email'           => $validated['email'],
+            'phone'           => $validated['phone'] ?? null,
+            'nik'             => $validated['nik'] ?? null,
+            'passport_number' => $validated['passport_number'] ?? null,
+            'password'        => Hash::make($validated['password']),
+            'role'            => 'pendaki',
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return $this->redirectAfterLogin()->with('success', 'Registrasi berhasil! Selamat datang, ' . $user->name . '.');
+    }
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Exception $e) {
+            return redirect()->route('login')->withErrors(['email' => 'Login dengan Google gagal. Silakan coba lagi.']);
+        }
+
+        $user = User::where('google_id', $googleUser->getId())
+            ->orWhere('email', $googleUser->getEmail())
+            ->first();
+
+        if ($user) {
+            // Update google_id jika login lewat email biasa sebelumnya
+            if (! $user->google_id) {
+                $user->update([
+                    'google_id' => $googleUser->getId(),
+                    'avatar'    => $googleUser->getAvatar(),
+                ]);
+            }
+        } else {
+            // Buat akun baru via Google (NIK/paspor kosong, wajib dilengkapi nanti)
+            $user = User::create([
+                'name'      => $googleUser->getName(),
+                'email'     => $googleUser->getEmail(),
+                'google_id' => $googleUser->getId(),
+                'avatar'    => $googleUser->getAvatar(),
+                'password'  => null,
+                'role'      => 'pendaki',
+            ]);
+        }
+
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return $this->redirectAfterLogin();
+    }
+
+    /**
+     * Show login form (web)
+     */
+    public function showLogin()
+    {
+        if (Auth::check()) {
+            return $this->redirectAfterLogin();
+        }
+
+        return view('auth.login');
+    }
+
+    /**
+     * Handle web login form submission
+     */
+    public function webLogin(Request $request)
+    {
+        $validated = $request->validate([
+            'email'    => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        if (!Auth::attempt($validated, $request->boolean('remember'))) {
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors(['email' => 'Email atau password salah.']);
+        }
+
+        $request->session()->regenerate();
+
+        return $this->redirectAfterLogin();
+    }
+
+    /**
+     * Handle web logout
+     */
+    public function webLogout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar.');
+    }
+
+    /**
+     * User login (API)
      */
     public function login(Request $request)
     {
