@@ -36,7 +36,8 @@
 
                     <div>
                         <label class="form-label">Role <span style="color:#dc2626;">*</span></label>
-                        <select name="role" class="form-input @error('role') border-red-400 @enderror">
+                        <select name="role" id="roleSelect" class="form-input @error('role') border-red-400 @enderror"
+                                onchange="document.getElementById('mountainField').style.display = this.value === 'pengelola_tn' ? 'block' : 'none'">
                             <option value="">Pilih role...</option>
                             <option value="pengelola_tn" {{ old('role') === 'pengelola_tn' ? 'selected' : '' }}>
                                 Pengelola Taman Nasional
@@ -46,6 +47,23 @@
                             </option>
                         </select>
                         @error('role')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div id="mountainField" style="display:{{ old('role') === 'pengelola_tn' ? 'block' : 'none' }};">
+                        <label class="form-label">Tugaskan ke Gunung</label>
+                        <select name="mountain_id" class="form-input">
+                            <option value="">— Pilih gunung —</option>
+                            @foreach($pengelolaList as $m)
+                            <option value="{{ $m->id }}"
+                                    {{ old('mountain_id') == $m->id ? 'selected' : '' }}
+                                    {{ $m->pengelola_id ? 'style=color:#999' : '' }}>
+                                {{ $m->name }}
+                                @if($m->pengelola_id) (sudah ada pengelola) @endif
+                            </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Opsional. Gunung yang akan dikelola oleh pengelola ini.</p>
+                        @error('mountain_id')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
 
                     <div>

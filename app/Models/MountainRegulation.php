@@ -17,12 +17,14 @@ class MountainRegulation extends Model
         'max_participants_per_account',
         'guide_required',
         'checkout_deadline_hour',
+        'min_elevation_experience',
     ];
 
     protected $casts = [
         'base_price' => 'decimal:2',
         'guide_required' => 'boolean',
         'checkout_deadline_hour' => 'integer',
+        'min_elevation_experience' => 'integer',
     ];
 
     public function mountain()

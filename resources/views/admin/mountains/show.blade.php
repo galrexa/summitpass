@@ -248,7 +248,7 @@
                         <th style="width:36px;">#</th>
                         <th>Nama Pos</th>
                         <th>Tipe</th>
-                        <th>Koordinat</th>
+                        <th>Koordinat (Lat, Lng)</th>
                         <th>Ketinggian</th>
                         <th>Est. Waktu</th>
                         <th></th>
@@ -257,8 +257,8 @@
                 <tbody>
                     @foreach($trail->checkpoints->sortBy('order_seq') as $cp)
                     @php
-                    $typeLabel = ['gate_in'=>'Gate In','pos'=>'Pos','summit'=>'Puncak','gate_out'=>'Gate Out'][$cp->type] ?? $cp->type;
-                    $typeBadge = ['gate_in'=>'badge-blue','pos'=>'badge-gray','summit'=>'badge-yellow','gate_out'=>'badge-blue'][$cp->type] ?? 'badge-gray';
+                        $typeLabel = ['gate_in'=>'Gate In','pos'=>'Pos','summit'=>'Puncak','gate_out'=>'Gate Out'][$cp->type] ?? $cp->type;
+                        $typeBadge = ['gate_in'=>'badge-blue','pos'=>'badge-gray','summit'=>'badge-yellow','gate_out'=>'badge-blue'][$cp->type] ?? 'badge-gray';
                     @endphp
                     <tr>
                         <td class="text-center font-mono font-bold">{{ $cp->order_seq }}</td>
@@ -270,7 +270,11 @@
                         </td>
                         <td><span class="badge {{ $typeBadge }}">{{ $typeLabel }}</span></td>
                         <td class="font-mono text-xs" style="color:var(--color-text-muted);">
-                            {{ number_format($cp->latitude, 5) }},<br>{{ number_format($cp->longitude, 5) }}
+                            @if($cp->latitude && $cp->longitude)
+                                {{ number_format($cp->latitude, 5) }},<br>{{ number_format($cp->longitude, 5) }}
+                            @else
+                                <span style="color:#f59e0b;font-weight:600;">Belum diset</span>
+                            @endif
                         </td>
                         <td class="text-sm">
                             {{ $cp->altitude ? number_format($cp->altitude).' m dpl' : '—' }}
@@ -288,14 +292,81 @@
                             @endif
                         </td>
                         <td>
-                            <form method="POST" action="{{ route('admin.mountains.checkpoints.destroy', [$mountain->id, $trail->id, $cp->id]) }}"
-                                  onsubmit="return confirm('Hapus pos {{ addslashes($cp->name) }}?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-ghost btn-icon btn-sm" title="Hapus pos" style="color:#dc2626;">
+                            <div class="flex gap-1 justify-end">
+                                <button onclick="document.getElementById('edit-cp-{{ $cp->id }}').classList.toggle('hidden')"
+                                        class="btn btn-ghost btn-icon btn-sm" title="Edit pos">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14H6L5 6"/>
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                     </svg>
                                 </button>
+                                <form method="POST" action="{{ route('admin.mountains.checkpoints.destroy', [$mountain->id, $trail->id, $cp->id]) }}"
+                                      onsubmit="return confirm('Hapus pos {{ addslashes($cp->name) }}?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-ghost btn-icon btn-sm" title="Hapus pos" style="color:#dc2626;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14H6L5 6"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {{-- Form edit inline per checkpoint --}}
+                    <tr id="edit-cp-{{ $cp->id }}" class="hidden" style="background:#f0fdf4;">
+                        <td colspan="7" style="padding:12px 16px;">
+                            <form method="POST" action="{{ route('admin.mountains.checkpoints.update', [$mountain->id, $trail->id, $cp->id]) }}">
+                                @csrf @method('PUT')
+                                <p class="text-xs font-semibold mb-2" style="color:var(--color-forest-700);">
+                                    Edit Pos: {{ $cp->name }}
+                                </p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                                    <div>
+                                        <label class="form-label">Nama Pos <span style="color:#dc2626;">*</span></label>
+                                        <input type="text" name="name" value="{{ $cp->name }}" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Tipe <span style="color:#dc2626;">*</span></label>
+                                        <select name="type" class="form-input" required>
+                                            <option value="gate_in"  {{ $cp->type==='gate_in'  ? 'selected' : '' }}>Gate In</option>
+                                            <option value="pos"      {{ $cp->type==='pos'      ? 'selected' : '' }}>Pos</option>
+                                            <option value="summit"   {{ $cp->type==='summit'   ? 'selected' : '' }}>Puncak</option>
+                                            <option value="gate_out" {{ $cp->type==='gate_out' ? 'selected' : '' }}>Gate Out</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Urutan <span style="color:#dc2626;">*</span></label>
+                                        <input type="number" name="order_seq" value="{{ $cp->order_seq }}" class="form-input" min="1" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Deskripsi</label>
+                                        <input type="text" name="description" value="{{ $cp->description }}" class="form-input" placeholder="Opsional">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                                    <div>
+                                        <label class="form-label">Latitude <span style="color:#dc2626;">*</span></label>
+                                        <input type="number" name="latitude" value="{{ $cp->latitude }}" class="form-input" step="any" placeholder="-8.1060" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Longitude <span style="color:#dc2626;">*</span></label>
+                                        <input type="number" name="longitude" value="{{ $cp->longitude }}" class="form-input" step="any" placeholder="112.9063" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Ketinggian (m dpl)</label>
+                                        <input type="number" name="altitude" value="{{ $cp->altitude }}" class="form-input" placeholder="cth. 2100">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Est. Waktu (menit)</label>
+                                        <input type="number" name="estimated_duration_minutes" value="{{ $cp->estimated_duration_minutes }}" class="form-input" placeholder="cth. 90" min="1">
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
+                                    <button type="button"
+                                            onclick="document.getElementById('edit-cp-{{ $cp->id }}').classList.add('hidden')"
+                                            class="btn btn-ghost btn-sm">Batal</button>
+                                </div>
                             </form>
                         </td>
                     </tr>

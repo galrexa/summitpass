@@ -10,49 +10,45 @@
     </div>
 
     {{-- Summary cards --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background:#dcfce7;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20,6 9,17 4,12"/>
-                </svg>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem;">
+        {{-- Total Pendapatan --}}
+        <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+            <div style="width:44px;height:44px;border-radius:0.6rem;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
             </div>
-            <div>
-                <div class="stat-card-value" style="font-size:1.1rem;">Rp {{ number_format($summary['total_paid'], 0, ',', '.') }}</div>
-                <div class="stat-card-label">Total Lunas</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background:#fef9c3;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-            </div>
-            <div>
-                <div class="stat-card-value" style="font-size:1.1rem;">Rp {{ number_format($summary['total_pending'], 0, ',', '.') }}</div>
-                <div class="stat-card-label">Total Pending</div>
+            <div style="min-width:0;">
+                <div style="font-size:1.15rem;font-weight:700;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Rp {{ number_format($summary['total_paid'], 0, ',', '.') }}</div>
+                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">Total Pendapatan</div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background:#dcfce7;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
+        {{-- Pending --}}
+        <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+            <div style="width:44px;height:44px;border-radius:0.6rem;background:#fef9c3;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <div>
-                <div class="stat-card-value">{{ $summary['count_paid'] }}</div>
-                <div class="stat-card-label">Transaksi Lunas</div>
+            <div style="min-width:0;">
+                <div style="font-size:1.15rem;font-weight:700;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Rp {{ number_format($summary['total_pending'], 0, ',', '.') }}</div>
+                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">Menunggu Pembayaran</div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background:#fef9c3;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
+        {{-- Jumlah transaksi lunas --}}
+        <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+            <div style="width:44px;height:44px;border-radius:0.6rem;background:#dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
             <div>
-                <div class="stat-card-value">{{ $summary['count_pending'] }}</div>
-                <div class="stat-card-label">Transaksi Pending</div>
+                <div style="font-size:1.5rem;font-weight:700;color:var(--color-text);">{{ $summary['count_paid'] }}</div>
+                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">Transaksi Lunas</div>
+            </div>
+        </div>
+        {{-- Jumlah transaksi pending --}}
+        <div style="background:var(--color-card);border:1px solid var(--color-border);border-radius:0.75rem;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+            <div style="width:44px;height:44px;border-radius:0.6rem;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div>
+                <div style="font-size:1.5rem;font-weight:700;color:var(--color-text);">{{ $summary['count_pending'] }}</div>
+                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">Transaksi Pending</div>
             </div>
         </div>
     </div>
@@ -138,8 +134,20 @@
                             <div class="text-xs" style="color:var(--color-text-muted);">{{ $payment->booking?->trail?->name }}</div>
                         </td>
                         <td>
-                            <span class="font-mono text-xs px-2 py-0.5 rounded" style="background:var(--color-forest-50);color:var(--color-forest-700);">
-                                {{ strtoupper($payment->gateway) }}
+                            @php
+                                $gatewayLabel = match($payment->gateway) {
+                                    'midtrans' => 'Midtrans',
+                                    'xendit'   => 'Xendit',
+                                    'manual'   => 'Manual',
+                                    'simulate' => 'Simulasi',
+                                    default    => strtoupper($payment->gateway),
+                                };
+                                $gatewayStyle = $payment->gateway === 'simulate'
+                                    ? 'background:#f3e8ff;color:#7c3aed;'
+                                    : 'background:var(--color-forest-50);color:var(--color-forest-700);';
+                            @endphp
+                            <span class="font-mono text-xs px-2 py-0.5 rounded" style="{{ $gatewayStyle }}">
+                                {{ $gatewayLabel }}
                             </span>
                         </td>
                         <td class="text-sm font-semibold">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>

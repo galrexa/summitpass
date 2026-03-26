@@ -60,6 +60,28 @@
                             <span class="text-sm font-medium" style="color:var(--color-text);">Gunung aktif (bisa dipesan)</span>
                         </label>
                     </div>
+
+                    @if(auth()->user()->role === 'admin')
+                    <div class="sm:col-span-2">
+                        <label class="form-label">Pengelola Taman Nasional</label>
+                        <select name="pengelola_id" class="form-input">
+                            <option value="">— Belum ditugaskan —</option>
+                            @foreach($pengelolaList as $p)
+                            <option value="{{ $p->id }}" {{ old('pengelola_id', $mountain->pengelola_id) == $p->id ? 'selected' : '' }}>
+                                {{ $p->name }} &lt;{{ $p->email }}&gt;
+                            </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Pengelola yang bertugas mengelola gunung ini.</p>
+                        @error('pengelola_id')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    @else
+                    <div class="sm:col-span-2">
+                        <label class="form-label">Pengelola</label>
+                        <p class="text-sm" style="color:var(--color-text);">{{ $mountain->pengelola?->name ?? '—' }}</p>
+                        <p class="text-xs" style="color:var(--color-text-muted);">Hanya admin yang dapat mengubah penugasan pengelola.</p>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -102,6 +124,13 @@
                                    style="width:16px;height:16px;accent-color:var(--color-forest-600);">
                             <span class="text-sm font-medium" style="color:var(--color-text);">Guide wajib</span>
                         </label>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="form-label">Syarat Pengalaman Minimum (mdpl)</label>
+                        <input type="number" name="min_elevation_experience" value="{{ old('min_elevation_experience', $reg?->min_elevation_experience) }}" class="form-input" min="0" placeholder="Kosongkan jika tidak ada syarat">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Pendaki harus pernah menyelesaikan pendakian di gunung dengan ketinggian minimal ini (contoh: 3000 untuk syarat pernah mendaki gunung 3000 mdpl).</p>
+                        @error('min_elevation_experience')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
                 </div>
             </div>

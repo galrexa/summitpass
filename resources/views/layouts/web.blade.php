@@ -54,12 +54,9 @@
             {{-- Main --}}
             <div class="sidebar-section-label">Utama</div>
 
-            @php
-                $dashboardRoute = in_array($role, ['admin', 'pengelola_tn']) ? route('admin.dashboard') : route('dashboard');
-                $dashboardActive = request()->routeIs('admin.dashboard') || request()->routeIs('dashboard');
-            @endphp
-            <a href="{{ $dashboardRoute }}"
-               class="sidebar-link {{ $dashboardActive ? 'active' : '' }}"
+            @if(in_array($role, ['admin', 'pengelola_tn']))
+            <a href="{{ route('admin.dashboard') }}"
+               class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                data-tooltip="Dashboard">
                 <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -67,6 +64,16 @@
                 </svg>
                 <span class="sidebar-link-label">Dashboard</span>
             </a>
+            @else
+            <a href="{{ route('pendaki.jejak-summit') }}"
+               class="sidebar-link {{ request()->routeIs('pendaki.jejak-summit') ? 'active' : '' }}"
+               data-tooltip="Jejak Summit">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
+                </svg>
+                <span class="sidebar-link-label">Jejak Summit</span>
+            </a>
+            @endif
 
             @if(in_array($role, ['admin', 'pengelola_tn']))
             <a href="{{ route('admin.bookings.index') }}"
@@ -82,8 +89,8 @@
                 <span class="sidebar-badge" x-show="!collapsed">{{ $pendingBookings ?? 0 }}</span>
             </a>
             @else
-            <a href="#"
-               class="sidebar-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}"
+            <a href="{{ route('pendaki.bookings') }}"
+               class="sidebar-link {{ request()->routeIs('pendaki.bookings') ? 'active' : '' }}"
                data-tooltip="Booking Saya">
                 <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -106,12 +113,29 @@
                 <span class="sidebar-link-label">Monitoring</span>
             </a>
             @else
-            <a href="#" class="sidebar-link" data-tooltip="Trekking Log" style="opacity:0.5;cursor:not-allowed;">
+            <a href="{{ route('pendaki.trekking-log') }}"
+               class="sidebar-link {{ request()->routeIs('pendaki.trekking-log') ? 'active' : '' }}"
+               data-tooltip="Trekking Log">
                 <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12,6 12,12 16,14"/>
                 </svg>
                 <span class="sidebar-link-label">Trekking Log</span>
+            </a>
+            @endif
+
+            {{-- QR Pass (pendaki only) --}}
+            @if($role === 'pendaki')
+            <a href="{{ route('pendaki.my-pass') }}"
+               class="sidebar-link {{ request()->routeIs('pendaki.my-pass') ? 'active' : '' }}"
+               data-tooltip="QR Pass Saya">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="3" height="3" rx=".5"/>
+                </svg>
+                <span class="sidebar-link-label">QR Pass Saya</span>
             </a>
             @endif
 
@@ -165,6 +189,17 @@
             {{-- Sistem (admin only) --}}
             @if($role === 'admin')
             <div class="sidebar-section-label">Sistem</div>
+            <a href="{{ route('admin.simulate.scan') }}"
+               class="sidebar-link {{ request()->routeIs('admin.simulate.*') ? 'active' : '' }}"
+               data-tooltip="Simulasi Scan">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="3" height="3" rx=".5"/>
+                </svg>
+                <span class="sidebar-link-label">Simulasi Scan Pos</span>
+            </a>
             <a href="{{ route('admin.settings.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
                data-tooltip="Pengaturan">
@@ -278,20 +313,37 @@
 
                         {{-- Menu items --}}
                         <div style="padding:0.375rem 0;">
-                            <a href="#" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
+                            @if(in_array(auth()->user()?->role, ['admin', 'pengelola_tn']))
+                            <a href="{{ route('admin.dashboard') }}" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
                                onmouseover="this.style.background='var(--color-forest-50)'" onmouseout="this.style.background='transparent'">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-text-muted);">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                 </svg>
                                 Profil Saya
                             </a>
-                            <a href="#" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
+                            <a href="{{ route('admin.settings.index') }}" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
                                onmouseover="this.style.background='var(--color-forest-50)'" onmouseout="this.style.background='transparent'">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-text-muted);">
                                     <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.42 1.42M4.93 4.93l1.42 1.42M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.42-1.42M4.93 19.07l1.42-1.42"/>
                                 </svg>
                                 Pengaturan Akun
                             </a>
+                            @else
+                            <a href="{{ route('pendaki.profile') }}" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
+                               onmouseover="this.style.background='var(--color-forest-50)'" onmouseout="this.style.background='transparent'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-text-muted);">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                Profil Saya
+                            </a>
+                            <a href="{{ route('pendaki.settings') }}" style="display:flex;align-items:center;gap:0.625rem;padding:0.6rem 1rem;font-size:0.85rem;color:var(--color-text);text-decoration:none;transition:background 0.1s;"
+                               onmouseover="this.style.background='var(--color-forest-50)'" onmouseout="this.style.background='transparent'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-text-muted);">
+                                    <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.42 1.42M4.93 4.93l1.42 1.42M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.42-1.42M4.93 19.07l1.42-1.42"/>
+                                </svg>
+                                Pengaturan Akun
+                            </a>
+                            @endif
                         </div>
 
                         {{-- Logout --}}

@@ -50,7 +50,7 @@
         .tab-btn.active { color: var(--color-forest-700); border-bottom-color: var(--color-forest-700); }
     </style>
 </head>
-<body x-data="{ showPass: false, showPassConfirm: false, nationality: 'wni' }">
+<body x-data="{ showPass: false, showPassConfirm: false }">
 
     {{-- Left: Illustration panel --}}
     <div class="auth-illustration">
@@ -187,32 +187,6 @@
                     @error('phone')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
 
-                {{-- Kewarganegaraan tabs --}}
-                <div style="margin-bottom:1rem;">
-                    <label class="form-label" style="margin-bottom:0.5rem;">Identitas diri</label>
-                    <div class="tab-group">
-                        <button type="button" class="tab-btn" :class="nationality === 'wni' ? 'active' : ''" @click="nationality = 'wni'">WNI (NIK)</button>
-                        <button type="button" class="tab-btn" :class="nationality === 'wna' ? 'active' : ''" @click="nationality = 'wna'">WNA (Paspor)</button>
-                    </div>
-
-                    {{-- NIK --}}
-                    <div x-show="nationality === 'wni'">
-                        <input type="text" id="nik" name="nik" value="{{ old('nik') }}"
-                            placeholder="16 digit NIK"
-                            maxlength="16" inputmode="numeric"
-                            class="form-input {{ $errors->has('nik') ? 'border-red-400' : '' }}">
-                        @error('nik')<p class="form-error">{{ $message }}</p>@enderror
-                    </div>
-
-                    {{-- Passport --}}
-                    <div x-show="nationality === 'wna'" style="display:none;">
-                        <input type="text" id="passport_number" name="passport_number" value="{{ old('passport_number') }}"
-                            placeholder="Nomor paspor"
-                            class="form-input {{ $errors->has('passport_number') ? 'border-red-400' : '' }}">
-                        @error('passport_number')<p class="form-error">{{ $message }}</p>@enderror
-                    </div>
-                </div>
-
                 {{-- Password --}}
                 <div style="margin-bottom:1rem;">
                     <label for="password" class="form-label">Password</label>
@@ -273,7 +247,11 @@
 
             </form>
 
-            <p style="text-align:center;font-size:0.875rem;color:var(--color-text-muted);margin-top:1.5rem;">
+            <p style="text-align:center;font-size:0.8rem;color:var(--color-text-muted);margin-top:1rem;line-height:1.5;">
+                NIK & data identitas akan diminta saat melengkapi profil setelah mendaftar.
+            </p>
+
+            <p style="text-align:center;font-size:0.875rem;color:var(--color-text-muted);margin-top:1rem;">
                 Sudah punya akun?
                 <a href="{{ route('login') }}" style="color:var(--color-forest-700);font-weight:600;text-decoration:none;">Masuk sekarang</a>
             </p>

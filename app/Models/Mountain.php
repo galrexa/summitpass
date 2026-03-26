@@ -18,15 +18,12 @@ class Mountain extends Model
         'description',
         'image_url',
         'is_active',
+        'pengelola_id',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
-
-    /**
-     * Relationships
-     */
 
     public function regulation()
     {
@@ -43,9 +40,10 @@ class Mountain extends Model
         return $this->hasMany(Booking::class);
     }
 
-    /**
-     * Scopes
-     */
+    public function pengelola()
+    {
+        return $this->belongsTo(User::class, 'pengelola_id');
+    }
 
     public function scopeActive($query)
     {
@@ -62,10 +60,6 @@ class Mountain extends Model
         return $query->where('name', 'like', "%{$search}%")
                      ->orWhere('location', 'like', "%{$search}%");
     }
-
-    /**
-     * Accessors
-     */
 
     public function getFormattedHeightAttribute()
     {

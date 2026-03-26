@@ -18,28 +18,18 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'            => 'required|string|max:255',
-            'email'           => 'required|string|email|max:255|unique:users',
-            'phone'           => 'nullable|string|max:20',
-            'nik'             => 'nullable|string|size:16|unique:users|regex:/^[0-9]{16}$/',
-            'passport_number' => 'nullable|string|max:20|unique:users',
-            'password'        => ['required', 'confirmed', Password::defaults()],
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'phone'    => 'nullable|string|max:20',
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        if (empty($validated['nik']) && empty($validated['passport_number'])) {
-            return response()->json([
-                'message' => 'NIK atau nomor paspor wajib diisi.',
-            ], 422);
-        }
-
         $user = User::create([
-            'name'            => $validated['name'],
-            'email'           => $validated['email'],
-            'phone'           => $validated['phone'] ?? null,
-            'nik'             => $validated['nik'] ?? null,
-            'passport_number' => $validated['passport_number'] ?? null,
-            'password'        => Hash::make($validated['password']),
-            'role'            => 'pendaki',
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'phone'    => $validated['phone'] ?? null,
+            'password' => Hash::make($validated['password']),
+            'role'     => 'pendaki',
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -58,7 +48,7 @@ class AuthController extends Controller
         if (in_array($role, ['admin', 'pengelola_tn'])) {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('dashboard');
+        return redirect()->route('pendaki.bookings');
     }
 
     /**
@@ -79,34 +69,24 @@ class AuthController extends Controller
     public function webRegister(Request $request)
     {
         $validated = $request->validate([
-            'name'            => 'required|string|max:255',
-            'email'           => 'required|string|email|max:255|unique:users',
-            'phone'           => 'nullable|string|max:20',
-            'nik'             => 'nullable|string|size:16|unique:users|regex:/^[0-9]{16}$/',
-            'passport_number' => 'nullable|string|max:20|unique:users',
-            'password'        => ['required', 'confirmed', Password::defaults()],
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'phone'    => 'nullable|string|max:20',
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        if (empty($validated['nik']) && empty($validated['passport_number'])) {
-            return back()
-                ->withInput()
-                ->withErrors(['nik' => 'NIK atau nomor paspor wajib diisi.']);
-        }
-
         $user = User::create([
-            'name'            => $validated['name'],
-            'email'           => $validated['email'],
-            'phone'           => $validated['phone'] ?? null,
-            'nik'             => $validated['nik'] ?? null,
-            'passport_number' => $validated['passport_number'] ?? null,
-            'password'        => Hash::make($validated['password']),
-            'role'            => 'pendaki',
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'phone'    => $validated['phone'] ?? null,
+            'password' => Hash::make($validated['password']),
+            'role'     => 'pendaki',
         ]);
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return $this->redirectAfterLogin()->with('success', 'Registrasi berhasil! Selamat datang, ' . $user->name . '.');
+        return redirect()->route('profile.setup')->with('success', 'Akun berhasil dibuat! Lengkapi profilmu untuk bisa booking SIMAKSI.');
     }
 
     /**
@@ -154,6 +134,11 @@ class AuthController extends Controller
 
         Auth::login($user, true);
         request()->session()->regenerate();
+
+        // New Google user — prompt to complete profile
+        if (empty($user->nik) && empty($user->passport_number) && $user->role === 'pendaki') {
+            return redirect()->route('profile.setup')->with('success', 'Login berhasil! Lengkapi profilmu untuk bisa booking SIMAKSI.');
+        }
 
         return $this->redirectAfterLogin();
     }

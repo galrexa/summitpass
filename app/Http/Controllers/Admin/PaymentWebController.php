@@ -14,11 +14,22 @@ class PaymentWebController extends Controller
         $query = Payment::with(['booking.mountain', 'booking.trail', 'booking.leader'])
             ->latest('created_at');
 
+        $user = auth()->user();
+        $pengelolaMountainId = null;
+        if ($user->role === 'pengelola_tn') {
+            $pengelolaMountainId = $user->managedMountain?->id;
+            if ($pengelolaMountainId) {
+                $query->whereHas('booking', fn($q) => $q->where('mountain_id', $pengelolaMountainId));
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('mountain_id')) {
+        if ($request->filled('mountain_id') && !$pengelolaMountainId) {
             $query->whereHas('booking', fn ($q) => $q->where('mountain_id', $request->mountain_id));
         }
 
@@ -40,13 +51,25 @@ class PaymentWebController extends Controller
         }
 
         $payments = $query->paginate(20)->withQueryString();
-        $mountains = Mountain::orderBy('name')->get(['id', 'name']);
+
+        $mountainsQuery = Mountain::orderBy('name');
+        if ($pengelolaMountainId) {
+            $mountainsQuery->where('id', $pengelolaMountainId);
+        }
+        $mountains = $mountainsQuery->get(['id', 'name']);
+
+        $summaryQuery = Payment::query();
+        if ($pengelolaMountainId) {
+            $summaryQuery->whereHas('booking', fn($q) => $q->where('mountain_id', $pengelolaMountainId));
+        } elseif ($user->role === 'pengelola_tn') {
+            $summaryQuery->whereRaw('1 = 0');
+        }
 
         $summary = [
-            'total_paid'    => Payment::where('status', 'paid')->sum('amount'),
-            'total_pending' => Payment::where('status', 'pending')->sum('amount'),
-            'count_paid'    => Payment::where('status', 'paid')->count(),
-            'count_pending' => Payment::where('status', 'pending')->count(),
+            'total_paid'    => (clone $summaryQuery)->where('status', 'paid')->sum('amount'),
+            'total_pending' => (clone $summaryQuery)->where('status', 'pending')->sum('amount'),
+            'count_paid'    => (clone $summaryQuery)->where('status', 'paid')->count(),
+            'count_pending' => (clone $summaryQuery)->where('status', 'pending')->count(),
         ];
 
         return view('admin.payments.index', compact('payments', 'mountains', 'summary'));

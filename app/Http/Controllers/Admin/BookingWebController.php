@@ -13,15 +13,31 @@ use Illuminate\Support\Facades\DB;
 
 class BookingWebController extends Controller
 {
+    private function getPengelolaMountainId(): ?int
+    {
+        $user = auth()->user();
+        if ($user->role === 'pengelola_tn') {
+            return $user->managedMountain?->id;
+        }
+        return null;
+    }
+
     public function index(Request $request)
     {
         $query = Booking::with(['mountain', 'trail', 'leader', 'payment'])->withCount('participants');
+
+        $pengelolaMountainId = $this->getPengelolaMountainId();
+        if ($pengelolaMountainId !== null) {
+            $query->where('mountain_id', $pengelolaMountainId);
+        } elseif (auth()->user()->role === 'pengelola_tn') {
+            $query->whereRaw('1 = 0');
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('mountain_id')) {
+        if ($request->filled('mountain_id') && !$pengelolaMountainId) {
             $query->where('mountain_id', $request->mountain_id);
         }
 
@@ -44,11 +60,20 @@ class BookingWebController extends Controller
         }
 
         $bookings = $query->latest()->paginate(20)->withQueryString();
-        $mountains = Mountain::orderBy('name')->get(['id', 'name']);
 
-        $statusCounts = Booking::selectRaw('status, count(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
+        $mountainsQuery = Mountain::orderBy('name');
+        if ($pengelolaMountainId) {
+            $mountainsQuery->where('id', $pengelolaMountainId);
+        }
+        $mountains = $mountainsQuery->get(['id', 'name']);
+
+        $statusCountsQuery = Booking::selectRaw('status, count(*) as total');
+        if ($pengelolaMountainId) {
+            $statusCountsQuery->where('mountain_id', $pengelolaMountainId);
+        } elseif (auth()->user()->role === 'pengelola_tn') {
+            $statusCountsQuery->whereRaw('1 = 0');
+        }
+        $statusCounts = $statusCountsQuery->groupBy('status')->pluck('total', 'status');
 
         return view('admin.bookings.index', compact('bookings', 'mountains', 'statusCounts'));
     }
@@ -63,12 +88,22 @@ class BookingWebController extends Controller
             'payment',
         ])->findOrFail($id);
 
+        $pengelolaMountainId = $this->getPengelolaMountainId();
+        if ($pengelolaMountainId !== null && $booking->mountain_id !== $pengelolaMountainId) {
+            abort(403, 'Akses ditolak.');
+        }
+
         return view('admin.bookings.show', compact('booking'));
     }
 
     public function cancel(Request $request, $id)
     {
         $booking = Booking::findOrFail($id);
+
+        $pengelolaMountainId = $this->getPengelolaMountainId();
+        if ($pengelolaMountainId !== null && $booking->mountain_id !== $pengelolaMountainId) {
+            abort(403, 'Akses ditolak.');
+        }
 
         if (!in_array($booking->status, ['pending_payment', 'paid'])) {
             return back()->with('error', 'Booking dengan status "'.$booking->status.'" tidak dapat dibatalkan.');
@@ -82,6 +117,11 @@ class BookingWebController extends Controller
     public function confirmPayment($id)
     {
         $booking = Booking::with(['participants', 'mountain.regulation', 'payment'])->findOrFail($id);
+
+        $pengelolaMountainId = $this->getPengelolaMountainId();
+        if ($pengelolaMountainId !== null && $booking->mountain_id !== $pengelolaMountainId) {
+            abort(403, 'Akses ditolak.');
+        }
 
         if (!$booking->payment || $booking->payment->status !== 'pending') {
             return back()->with('error', 'Tidak ada pembayaran pending untuk booking ini.');
@@ -115,7 +155,7 @@ class BookingWebController extends Controller
                 QrPass::firstOrCreate(
                     ['booking_participant_id' => $participant->id],
                     [
-                        'qr_token'   => QrPass::generateToken(),
+                        'qr_token'    => QrPass::generateToken(),
                         'valid_from'  => $validFrom,
                         'valid_until' => $validUntil,
                         'status'      => $status,
