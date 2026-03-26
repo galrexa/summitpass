@@ -35,7 +35,7 @@ class SettingsWebController extends Controller
 
     public function runAnomalyCheck()
     {
-        Artisan::call('anomaly:check', ['--force' => true]);
+        Artisan::call('summitpass:check-anomalies');
         $output = Artisan::output();
 
         return back()

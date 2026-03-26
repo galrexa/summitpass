@@ -19,7 +19,7 @@
             <a href="{{ route('profile.setup') }}" class="btn btn-primary btn-sm">Lengkapi Profil</a>
         </div>
 
-        @elseif($bookings->isEmpty())
+        @elseif($participants->isEmpty())
         {{-- No paid/active bookings --}}
         <div style="text-align:center;padding:3rem 1rem;">
             <div style="width:64px;height:64px;background:var(--color-forest-100);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
@@ -31,20 +31,23 @@
         </div>
 
         @else
-        {{-- QR Pass cards --}}
-        @foreach($bookings as $booking)
+        {{-- QR Pass cards — satu kartu per partisipasi --}}
+        @foreach($participants as $participant)
         @php
-            $participant = $booking->participants->first();
-            $qrPass      = $participant?->qrPass;
-            $isActive    = $qrPass && now()->between($booking->start_date, $booking->end_date->endOfDay());
-            $isPending   = $booking->start_date->isFuture();
+            $booking  = $participant->booking;
+            $qrPass   = $participant->qrPass;
+            $isActive = $qrPass && now()->between($booking->start_date, $booking->end_date->endOfDay());
+            $isPending = $booking->start_date->isFuture();
+            $isLeader  = $participant->role === 'leader';
         @endphp
 
         <div class="card" style="margin-bottom:1.25rem;overflow:hidden;">
             {{-- Header strip --}}
             <div style="background:var(--color-forest-700);padding:.875rem 1.125rem;display:flex;align-items:center;justify-content:space-between;">
                 <div>
-                    <div style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-forest-300);">SummitPass</div>
+                    <div style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-forest-300);">
+                        SummitPass &mdash; {{ $isLeader ? 'Leader' : 'Member' }}
+                    </div>
                     <div style="font-size:.95rem;font-weight:700;color:white;margin-top:.1rem;">{{ $booking->mountain->name }}</div>
                     <div style="font-size:.75rem;color:var(--color-forest-300);margin-top:.1rem;">{{ $booking->trail->name }}</div>
                 </div>
@@ -78,7 +81,7 @@
                 <div style="flex:1;min-width:0;">
                     <div style="margin-bottom:.875rem;">
                         <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);">Nama Pendaki</div>
-                        <div style="font-size:.9rem;font-weight:600;color:var(--color-text);margin-top:.15rem;">{{ $user->name }}</div>
+                        <div style="font-size:.9rem;font-weight:600;color:var(--color-text);margin-top:.15rem;">{{ $participant->name }}</div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1rem;">
                         <div>
@@ -94,7 +97,7 @@
                             <div style="font-size:.82rem;font-weight:700;color:var(--color-forest-700);font-family:monospace;margin-top:.1rem;">{{ $booking->booking_code }}</div>
                         </div>
                         <div>
-                            <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);">Peserta</div>
+                            <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);">Total Peserta</div>
                             <div style="font-size:.82rem;color:var(--color-text);margin-top:.1rem;">{{ $booking->participants->count() }} orang</div>
                         </div>
                     </div>

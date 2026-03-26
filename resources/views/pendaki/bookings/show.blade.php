@@ -54,7 +54,6 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                 @foreach([
                     ['Gunung', $booking->mountain->name ?? '-'],
-                    ['Jalur', $booking->trail->name ?? '-'],
                     ['Tanggal Naik', $booking->start_date->format('d M Y')],
                     ['Tanggal Turun', $booking->end_date->format('d M Y')],
                     ['Durasi', $booking->start_date->diffInDays($booking->end_date) + 1 . ' hari'],
@@ -65,6 +64,31 @@
                     <div style="font-size:.875rem;color:var(--color-text);">{{ $value }}</div>
                 </div>
                 @endforeach
+
+                {{-- ← BAGIAN JALUR: DIPISAH agar bisa menampilkan dua jalur untuk lintas jalur --}}
+                <div @if($booking->is_cross_trail) style="grid-column: span 2;" @endif>
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);margin-bottom:.4rem;">
+                        Jalur Pendakian
+                        @if($booking->is_cross_trail)
+                            <span style="margin-left:.4rem;padding:.1rem .5rem;border-radius:99px;background:#fef3c7;color:#92400e;font-size:.65rem;font-weight:700;">LINTAS JALUR</span>
+                        @endif
+                    </div>
+                    @if($booking->is_cross_trail)
+                        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                            <span style="display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .7rem;border-radius:6px;background:#dcfce7;color:#166534;font-size:.8rem;font-weight:600;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                                {{ $booking->trail->name ?? '-' }}
+                            </span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            <span style="display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .7rem;border-radius:6px;background:#ede9fe;color:#5b21b6;font-size:.8rem;font-weight:600;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                {{ $booking->effectiveTrailOut()->name ?? '-' }}
+                            </span>
+                        </div>
+                    @else
+                        <div style="font-size:.875rem;color:var(--color-text);">{{ $booking->trail->name ?? '-' }}</div>
+                    @endif
+                </div>
             </div>
 
             <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;">

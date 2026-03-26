@@ -48,7 +48,10 @@
                             <div style="font-size:.95rem;font-weight:700;color:white;margin-top:.1rem;" x-text="pass.participant.name"></div>
                             <div style="font-size:.75rem;color:var(--color-forest-300);margin-top:.1rem;">
                                 <span x-text="pass.booking.mountain"></span> —
-                                <span x-text="pass.booking.trail"></span>
+                                <span x-text="pass.booking.trail_in"></span>
+                                <template x-if="pass.booking.is_cross_trail">
+                                    <span> → <span x-text="pass.booking.trail_out"></span></span>
+                                </template>
                             </div>
                         </div>
                         <div style="text-align:right;">
@@ -73,6 +76,43 @@
                         <div>
                             <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);">Status Booking</div>
                             <div style="font-size:.85rem;font-weight:600;color:var(--color-text);text-transform:capitalize;" x-text="pass.booking.status.replace('_',' ')"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);">Durasi</div>
+                            <div style="font-size:.85rem;font-weight:600;color:var(--color-text);">
+                                <span x-text="pass.booking.days"></span> hari · <span x-text="pass.booking.pax_count"></span> peserta
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Rincian Biaya --}}
+                    <div style="padding:.75rem 1.125rem;background:white;border-top:1px solid var(--color-forest-100);">
+                        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:.5rem;">Rincian Biaya SIMAKSI</div>
+                        <div style="display:flex;flex-direction:column;gap:.25rem;font-size:.8rem;">
+                            <div style="display:flex;justify-content:space-between;">
+                                <span style="color:var(--color-text-muted);">
+                                    Biaya jalur × <span x-text="pass.booking.pax_count"></span> peserta
+                                </span>
+                                <span x-text="'Rp ' + (pass.booking.fee_breakdown.base_price * pass.booking.pax_count).toLocaleString('id-ID')"></span>
+                            </div>
+                            <template x-if="pass.booking.guide_requested">
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span style="color:var(--color-text-muted);">
+                                        Guide (Rp <span x-text="pass.booking.fee_breakdown.guide_price_per_day.toLocaleString('id-ID')"></span>/hari × <span x-text="pass.booking.days"></span> hari)
+                                    </span>
+                                    <span x-text="'Rp ' + pass.booking.fee_breakdown.guide_total.toLocaleString('id-ID')"></span>
+                                </div>
+                            </template>
+                            <template x-if="!pass.booking.guide_requested">
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span style="color:var(--color-text-muted);">Guide</span>
+                                    <span style="color:#9ca3af;">Tidak diminta</span>
+                                </div>
+                            </template>
+                            <div style="display:flex;justify-content:space-between;border-top:1px solid var(--color-border);padding-top:.3rem;margin-top:.1rem;font-weight:700;">
+                                <span style="color:var(--color-forest-700);">Total</span>
+                                <span style="color:var(--color-forest-700);" x-text="'Rp ' + pass.booking.total_price.toLocaleString('id-ID')"></span>
+                            </div>
                         </div>
                     </div>
                 </div>

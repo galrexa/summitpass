@@ -87,6 +87,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,pengelol
     Route::get('/trekking-map/data',                   [TrekkingMapController::class, 'data'])->name('trekking-map.data');
     Route::get('/trekking-map/trails/{mountainId}',    [TrekkingMapController::class, 'trails'])->name('trekking-map.trails');
 
+    // Simulate scan — accessible by admin & pengelola_tn
+    Route::get('/simulate/scan',     [SimulateScanController::class, 'index'])->name('simulate.scan');
+    Route::post('/simulate/resolve', [SimulateScanController::class, 'resolve'])->name('simulate.resolve');
+    Route::post('/simulate/record',  [SimulateScanController::class, 'record'])->name('simulate.record');
+
+    // Anomaly check — accessible by admin & pengelola_tn
+    Route::post('/settings/run-anomaly-check', [SettingsWebController::class, 'runAnomalyCheck'])->name('settings.run-anomaly-check');
+
     // Admin-only
     Route::middleware('role:admin')->group(function () {
         Route::get('/users',             [UserWebController::class, 'index'])->name('users.index');
@@ -97,11 +105,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,pengelol
         Route::delete('/users/{id}',     [UserWebController::class, 'destroy'])->name('users.destroy');
 
         Route::get('/settings',                    [SettingsWebController::class, 'index'])->name('settings.index');
-        Route::post('/settings/run-anomaly-check', [SettingsWebController::class, 'runAnomalyCheck'])->name('settings.run-anomaly-check');
         Route::post('/settings/{key}',             [SettingsWebController::class, 'update'])->name('settings.update');
-
-        Route::get('/simulate/scan',     [SimulateScanController::class, 'index'])->name('simulate.scan');
-        Route::post('/simulate/resolve', [SimulateScanController::class, 'resolve'])->name('simulate.resolve');
-        Route::post('/simulate/record',  [SimulateScanController::class, 'record'])->name('simulate.record');
     });
 });

@@ -185,8 +185,8 @@
             </a>
             @endif
 
-            {{-- Pengaturan --}}
-            @if($role === 'admin')
+            {{-- Simulasi Scan — admin & pengelola_tn --}}
+            @if(in_array($role, ['admin', 'pengelola_tn']))
             <div class="sidebar-section-label">Sistem</div>
             <a href="{{ route('admin.simulate.scan') }}"
                class="sidebar-link {{ request()->routeIs('admin.simulate.*') ? 'active' : '' }}"
@@ -199,6 +199,8 @@
                 </svg>
                 <span class="sidebar-link-label">Simulasi Scan Pos</span>
             </a>
+            @endif
+            @if($role === 'admin')
             <a href="{{ route('admin.settings.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
                data-tooltip="Pengaturan">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BookingParticipant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -45,6 +46,16 @@ class ProfileController extends Controller
             'passport_number' => $validated['passport_number'] ?? null,
             'phone'           => $validated['phone'] ?? $user->phone,
         ]);
+
+        // Auto-link booking participant yang NIK-nya cocok dan belum ter-link ke akun
+        $identifierField = $validated['nationality'] === 'wni' ? 'nik' : 'passport_number';
+        $identifierValue = $validated[$identifierField] ?? null;
+
+        if ($identifierValue) {
+            BookingParticipant::where('nik', $identifierValue)
+                ->whereNull('user_id')
+                ->update(['user_id' => $user->id]);
+        }
 
         return redirect()->route('pendaki.bookings')->with('success', 'Profil berhasil dilengkapi!');
     }

@@ -11,15 +11,13 @@ class MonitoringWebController extends Controller
 {
     public function index()
     {
-        // Pendaki yang sedang aktif di jalur (QrPass status active, valid_until belum lewat)
+        // Pendaki yang sedang aktif di jalur (QrPass status active)
         $activePasses = QrPass::with([
                 'participant.booking.mountain',
                 'participant.booking.trail',
                 'trekkingLogs' => fn ($q) => $q->with('checkpoint')->latest('scanned_at')->limit(1),
             ])
             ->where('status', 'active')
-            ->where('valid_from', '<=', now())
-            ->where('valid_until', '>=', now())
             ->orderBy('valid_from')
             ->get();
 

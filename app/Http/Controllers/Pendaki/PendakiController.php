@@ -44,12 +44,18 @@ class PendakiController extends Controller
             ->sortByDesc(fn($g) => $g['first_scan'])
             ->values();
 
-        $completedBookings = Booking::where('leader_user_id', $user->id)
-            ->where('status', 'completed')
+        // Booking yang user pernah ikuti (sebagai leader atau member) dan punya aktivitas scan
+        $hikedBookingIds = BookingParticipant::where('user_id', $user->id)
+            ->whereHas('qrPass.trekkingLogs')
+            ->pluck('booking_id')
+            ->unique();
+
+        $completedBookings = Booking::whereIn('id', $hikedBookingIds)
+            ->whereIn('status', ['active', 'completed'])
             ->count();
 
-        $uniqueMountainsCount = Booking::where('leader_user_id', $user->id)
-            ->where('status', 'completed')
+        $uniqueMountainsCount = Booking::whereIn('id', $hikedBookingIds)
+            ->whereIn('status', ['active', 'completed'])
             ->distinct('mountain_id')
             ->count('mountain_id');
 
@@ -62,25 +68,32 @@ class PendakiController extends Controller
     {
         $user = Auth::user();
 
-        $bookings = Booking::with([
-                'mountain', 'trail',
-                'participants' => fn($q) => $q->where('user_id', $user->id)->with('qrPass'),
+        // Ambil semua partisipasi user (sebagai leader maupun member)
+        $participants = BookingParticipant::with([
+                'booking.mountain',
+                'booking.trail',
+                'qrPass',
             ])
-            ->where('leader_user_id', $user->id)
-            ->whereIn('status', ['paid', 'active'])
-            ->orderBy('start_date')
+            ->where('user_id', $user->id)
+            ->whereHas('booking', fn($q) => $q->whereIn('status', ['paid', 'active']))
+            ->orderBy('created_at')
             ->get();
 
-        return view('pendaki.my-pass', compact('user', 'bookings'));
+        return view('pendaki.my-pass', compact('user', 'participants'));
     }
 
     public function jejakSummit()
     {
         $user = Auth::user();
 
+        $hikedBookingIds = BookingParticipant::where('user_id', $user->id)
+            ->whereHas('qrPass.trekkingLogs')
+            ->pluck('booking_id')
+            ->unique();
+
         $completedBookings = Booking::with('mountain')
-            ->where('leader_user_id', $user->id)
-            ->where('status', 'completed')
+            ->whereIn('id', $hikedBookingIds)
+            ->whereIn('status', ['active', 'completed'])
             ->orderByDesc('end_date')
             ->get();
 

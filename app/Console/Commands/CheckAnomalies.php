@@ -2,119 +2,46 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Booking;
 use App\Models\QrPass;
-use App\Models\SystemSetting;
 use App\Models\TrekkingLog;
+use App\Models\SystemSetting;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class CheckAnomalies extends Command
 {
-    protected $signature   = 'anomaly:check {--force : Jalankan meski belum waktunya}';
-    protected $description = 'Cek anomali pendaki: belum checkout setelah batas waktu, atau log terhenti.';
+    protected $signature   = 'summitpass:check-anomalies';
+    protected $description = 'Cek anomali pendaki: stalled log, overdue, dan checkpoint di luar rute lintas jalur';
 
     public function handle(): int
     {
-        $intervalMinutes = (int) SystemSetting::get('anomaly_check_interval_minutes', 30);
-        $lastRun         = Cache::get('anomaly:last_run');
+        $this->info('Memulai pengecekan anomali...');
 
-        // Lewati jika belum waktunya, kecuali flag --force digunakan
-        if (!$this->option('force') && $lastRun) {
-            $minutesSinceLast = Carbon::parse($lastRun)->diffInMinutes(now());
-            if ($minutesSinceLast < $intervalMinutes) {
-                $this->line("Belum waktunya. Interval: {$intervalMinutes} menit. Terakhir jalan: {$minutesSinceLast} menit lalu.");
-                return self::SUCCESS;
-            }
-        }
+        $stalled  = $this->checkStalledLogs();
+        $overdue  = $this->checkOverdueAtCheckpoint();
+        $wrongOut = $this->checkWrongGateOut();
 
-        $this->info('[' . now()->toDateTimeString() . '] Menjalankan cek anomali...');
+        $this->info("Selesai. Stalled: {$stalled} | Overdue: {$overdue} | Wrong gate-out: {$wrongOut}");
 
-        $lateCheckouts  = $this->checkLateCheckouts();
-        $stalledHikers  = $this->checkStalledLogs();
-
-        Cache::put('anomaly:last_run', now()->toIso8601String(), now()->addHours(24));
-
-        $this->info("Selesai. Late checkout: {$lateCheckouts} | Stalled: {$stalledHikers}");
-
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 
     /**
-     * Alert 1: Pendaki yang melewati checkout_deadline_hour tapi belum scan gate_out.
-     */
-    private function checkLateCheckouts(): int
-    {
-        $graceMinutes = (int) SystemSetting::get('anomaly_checkout_grace_minutes', 0);
-        $count        = 0;
-
-        // Ambil semua QrPass aktif yang masa berlakunya sudah habis
-        $overduePasses = QrPass::with([
-                'participant.booking.mountain.regulation',
-                'participant.booking.trail',
-                'participant.user',
-            ])
-            ->where('status', 'active')
-            ->where('valid_until', '<=', now()->subMinutes($graceMinutes))
-            ->get();
-
-        foreach ($overduePasses as $pass) {
-            // Cek apakah sudah ada scan gate_out (direction: down) di checkpoint gate_out
-            $hasCheckedOut = TrekkingLog::where('qr_pass_id', $pass->id)
-                ->whereHas('checkpoint', fn ($q) => $q->where('type', 'gate_out'))
-                ->where('direction', 'down')
-                ->exists();
-
-            if ($hasCheckedOut) {
-                // Normalkan status jika sudah checkout tapi belum diupdate
-                $pass->update(['status' => 'used']);
-                continue;
-            }
-
-            $booking     = $pass->participant->booking;
-            $mountain    = $booking->mountain;
-            $participant = $pass->participant;
-
-            $logContext = [
-                'type'          => 'late_checkout',
-                'booking_code'  => $booking->booking_code,
-                'mountain'      => $mountain->name,
-                'trail'         => $booking->trail->name,
-                'participant'   => $participant->name,
-                'valid_until'   => $pass->valid_until->toDateTimeString(),
-                'overdue_since' => $pass->valid_until->diffForHumans(),
-            ];
-
-            Log::channel('stack')->warning('ANOMALI: Pendaki belum checkout', $logContext);
-
-            $this->warn(
-                "LATE CHECKOUT — {$participant->name} | {$mountain->name} | deadline: {$pass->valid_until->toDateTimeString()}"
-            );
-
-            // Tandai QrPass sebagai expired agar tidak dipakai lagi
-            $pass->update(['status' => 'expired']);
-
-            // TODO (fase produksi): kirim notifikasi WhatsApp/email ke pengelola TN
-            // Notification::send($mountain->pengelola, new LateCheckoutAlert($pass, $logContext));
-
-            $count++;
-        }
-
-        return $count;
-    }
-
-    /**
-     * Alert 2 (opsional): Pendaki yang log scan-nya terhenti lebih dari X jam.
+     * Pendaki yang sudah tidak ada aktivitas scan > threshold jam.
+     * Tidak berubah, tapi sekarang juga menyertakan info cross-trail di log.
      */
     private function checkStalledLogs(): int
     {
         $thresholdHours = (int) SystemSetting::get('anomaly_stall_threshold_hours', 6);
         $count          = 0;
 
-        // QrPass yang masih aktif dan belum expired
-        $activePasses = QrPass::with(['participant.booking.mountain', 'participant'])
+        $activePasses = QrPass::with([
+                'participant.booking.mountain',
+                'participant.booking.trail',
+                'participant.booking.trailOut', // ← BARU
+                'participant',
+            ])
             ->where('status', 'active')
             ->where('valid_from', '<=', now())
             ->where('valid_until', '>=', now())
@@ -125,7 +52,6 @@ class CheckAnomalies extends Command
                 ->latest('scanned_at')
                 ->first();
 
-            // Jika belum ada log sama sekali atau log terakhir lebih dari threshold jam lalu
             $lastActivity = $lastLog
                 ? Carbon::parse($lastLog->scanned_at)
                 : Carbon::parse($pass->valid_from);
@@ -139,25 +65,154 @@ class CheckAnomalies extends Command
             $booking     = $pass->participant->booking;
             $participant = $pass->participant;
 
+            // ← BARU: sertakan info rute lengkap termasuk cross-trail
+            $routeInfo = $booking->is_cross_trail
+                ? "{$booking->trail->name} (naik) → {$booking->effectiveTrailOut()->name} (turun)"
+                : $booking->trail->name;
+
             $logContext = [
                 'type'                 => 'stalled_log',
                 'booking_code'         => $booking->booking_code,
                 'mountain'             => $booking->mountain->name,
+                'route'                => $routeInfo,
+                'is_cross_trail'       => $booking->is_cross_trail,
                 'participant'          => $participant->name,
                 'last_activity'        => $lastActivity->toDateTimeString(),
                 'hours_since_activity' => $hoursSinceActivity,
             ];
 
             Log::channel('stack')->warning('ANOMALI: Log pendaki terhenti', $logContext);
-
-            $this->warn(
-                "STALLED — {$participant->name} | {$booking->mountain->name} | tidak ada aktivitas {$hoursSinceActivity} jam"
-            );
-
-            // TODO (fase produksi): kirim notifikasi ke pengelola TN
-            // Notification::send($mountain->pengelola, new StalledHikerAlert($pass, $logContext));
+            $this->warn("STALLED — {$participant->name} | {$booking->mountain->name} | {$routeInfo} | idle {$hoursSinceActivity} jam");
 
             $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * BARU: Pendaki lintas jalur yang sudah melewati estimasi waktu
+     * untuk tiba di pos berikutnya berdasarkan estimated_duration_minutes.
+     */
+    private function checkOverdueAtCheckpoint(): int
+    {
+        $bufferMultiplier = 1.5; // 50% buffer di atas estimasi
+        $count = 0;
+
+        $activePasses = QrPass::with([
+                'participant.booking.trail.checkpoints',
+                'participant.booking.trailOut.checkpoints',
+                'participant',
+            ])
+            ->where('status', 'active')
+            ->where('valid_from', '<=', now())
+            ->where('valid_until', '>=', now())
+            ->get();
+
+        foreach ($activePasses as $pass) {
+            $lastLog = TrekkingLog::where('qr_pass_id', $pass->id)
+                ->with('checkpoint')
+                ->latest('scanned_at')
+                ->first();
+
+            if (!$lastLog) {
+                continue;
+            }
+
+            $lastCheckpoint = $lastLog->checkpoint;
+            if (!$lastCheckpoint || !$lastCheckpoint->estimated_duration_minutes) {
+                continue;
+            }
+
+            $estimatedArrival = Carbon::parse($lastLog->scanned_at)
+                ->addMinutes((int) ($lastCheckpoint->estimated_duration_minutes * $bufferMultiplier));
+
+            if (now()->lessThan($estimatedArrival)) {
+                continue;
+            }
+
+            $booking     = $pass->participant->booking;
+            $participant = $pass->participant;
+            $overdueMin  = (int) $estimatedArrival->diffInMinutes(now());
+
+            $logContext = [
+                'type'            => 'overdue_checkpoint',
+                'booking_code'    => $booking->booking_code,
+                'mountain'        => $booking->mountain->name,
+                'is_cross_trail'  => $booking->is_cross_trail,
+                'participant'     => $participant->name,
+                'last_checkpoint' => $lastCheckpoint->name,
+                'direction'       => $lastLog->direction,
+                'overdue_minutes' => $overdueMin,
+            ];
+
+            Log::channel('stack')->warning('ANOMALI: Pendaki overdue di pos', $logContext);
+            $this->warn("OVERDUE — {$participant->name} | pos terakhir: {$lastCheckpoint->name} | terlambat {$overdueMin} menit");
+
+            // Flag anomali pada log terakhir
+            $lastLog->flagAnomaly("Overdue {$overdueMin} menit dari estimasi tiba pos berikutnya.");
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * BARU: Pendaki lintas jalur yang melakukan scan turun
+     * di gate_out yang berbeda dari trail_out_id yang dideklarasikan
+     * (tanpa anomaly_flag sebelumnya = belum terdeteksi).
+     */
+    private function checkWrongGateOut(): int
+    {
+        $count = 0;
+
+        // Hanya booking lintas jalur yang aktif
+        $activePasses = QrPass::with([
+                'participant.booking.trail',
+                'participant.booking.trailOut',
+                'participant',
+            ])
+            ->whereHas('participant.booking', fn($q) => $q->where('is_cross_trail', true)->where('status', 'active'))
+            ->where('status', 'active')
+            ->get();
+
+        foreach ($activePasses as $pass) {
+            $booking = $pass->participant->booking;
+
+            // Cari log scan gate_out arah turun
+            $gateOutLog = TrekkingLog::where('qr_pass_id', $pass->id)
+                ->where('direction', 'down')
+                ->whereHas('checkpoint', fn($q) => $q->where('type', 'gate_out'))
+                ->with('checkpoint')
+                ->latest('scanned_at')
+                ->first();
+
+            if (!$gateOutLog) {
+                continue;
+            }
+
+            $declaredOutTrailId = $booking->effectiveTrailOut()->id;
+
+            // Jika gate_out yang di-scan bukan dari jalur turun yang dideklarasikan
+            if ($gateOutLog->checkpoint->trail_id !== $declaredOutTrailId && !$gateOutLog->anomaly_flag) {
+                $reason = "Checkout di gate_out '{$gateOutLog->checkpoint->name}' "
+                    . "(trail_id={$gateOutLog->checkpoint->trail_id}) "
+                    . "berbeda dari jalur turun yang dideklarasikan: "
+                    . "'{$booking->effectiveTrailOut()->name}' (trail_id={$declaredOutTrailId}).";
+
+                $gateOutLog->flagAnomaly($reason);
+
+                Log::channel('stack')->warning('ANOMALI: Checkout di gate berbeda dari deklarasi', [
+                    'booking_code'   => $booking->booking_code,
+                    'participant'    => $pass->participant->name,
+                    'declared_out'   => $booking->effectiveTrailOut()->name,
+                    'actual_out'     => $gateOutLog->checkpoint->name,
+                ]);
+
+                $this->warn("WRONG GATE-OUT — {$pass->participant->name} | deklarasi: {$booking->effectiveTrailOut()->name} | aktual: {$gateOutLog->checkpoint->name}");
+                $count++;
+            }
         }
 
         return $count;

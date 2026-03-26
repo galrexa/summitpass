@@ -256,6 +256,56 @@
                     </div>
                 </div>
 
+                {{-- ── Toggle Lintas Jalur ─────────────────────────────────── --}}
+                <div style="margin-top:1rem;padding:1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;">
+                    <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;user-select:none;">
+                        <div style="position:relative;width:38px;height:22px;flex-shrink:0;">
+                            <input type="checkbox" x-model="crossTrail" id="cross_trail_toggle"
+                                style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0;z-index:2;">
+                            <div :style="crossTrail ? 'background:#16a34a' : 'background:#d1d5db'"
+                                style="width:38px;height:22px;border-radius:11px;transition:background .2s;"></div>
+                            <div :style="crossTrail ? 'transform:translateX(16px)' : 'transform:translateX(2px)'"
+                                style="position:absolute;top:2px;left:0;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:.875rem;font-weight:600;color:#166534;">Lintas Jalur</div>
+                            <div style="font-size:.75rem;color:#6b7280;margin-top:.1rem;">Naik dan turun melalui jalur berbeda</div>
+                        </div>
+                    </label>
+                </div>
+
+                {{-- ── Jalur Turun (muncul hanya jika lintas jalur aktif) ─── --}}
+                <div x-show="crossTrail" x-transition style="margin-top:.75rem;">
+                    <label class="form-label" for="trail_out_id">
+                        Jalur Turun (Gate OUT)
+                        <span style="color:#dc2626;">*</span>
+                    </label>
+                    <select
+                        name="trail_out_id"
+                        id="trail_out_id"
+                        x-model="trailOutId"
+                        :required="crossTrail"
+                        class="form-input"
+                        style="appearance:auto;"
+                    >
+                        <option value="">— Pilih jalur turun —</option>
+                        <template x-for="trail in trailsForOut" :key="trail.id">
+                            <option
+                                :value="trail.id"
+                                x-text="trail.name + (trail.grade ? ' (Grade ' + trail.grade + ')' : '')"
+                                :disabled="trail.id == selectedTrailId"
+                                :style="trail.id == selectedTrailId ? 'color:#9ca3af' : ''"
+                            ></option>
+                        </template>
+                    </select>
+                    <p style="font-size:.72rem;color:#6b7280;margin-top:.25rem;">
+                        Jalur yang sudah dipilih sebagai jalur naik tidak dapat dipilih kembali.
+                    </p>
+                    @error('trail_out_id')
+                        <p style="font-size:.75rem;color:#dc2626;margin-top:.25rem;">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 {{-- Dates --}}
                 <div style="margin-bottom:1.25rem;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem;">
@@ -497,6 +547,9 @@
             maxPax: 10,
             maxDays: 7,
             trails: [],
+            trailsForOut: [],
+            crossTrail: false,
+            trailOutId: '',
             loadingTrails: false,
             startDate: '',
             endDate: '',
@@ -538,7 +591,10 @@
                 this.selectedTrailGrade = null;
                 try {
                     const r = await fetch(`/api/mountains/${this.selectedMountainId}/trails`);
-                    this.trails = await r.json();
+                    const data = await r.json();
+                    this.trails = data;
+                    this.trailsForOut = data;
+                    this.trailOutId = '';
                 } finally {
                     this.loadingTrails = false;
                 }

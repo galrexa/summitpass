@@ -17,7 +17,12 @@ class SimulateScanController extends Controller
     }
 
     /**
-     * Resolve a QR token — return booking + trail checkpoints as JSON.
+     * Resolve QR token — kembalikan booking + checkpoints SEMUA jalur yang valid.
+     *
+     * PERUBAHAN LINTAS JALUR:
+     * Untuk booking lintas jalur, checkpoints yang ditampilkan mencakup
+     * checkpoints dari trail_id (naik) DAN trail_out_id (turun), bukan
+     * hanya satu jalur.
      */
     public function resolve(Request $request)
     {
@@ -28,19 +33,38 @@ class SimulateScanController extends Controller
         }
 
         $qrPass = QrPass::with([
-            'participant.booking.mountain',
+            'participant.booking.mountain.regulation',
             'participant.booking.trail.checkpoints',
-            'participant',
+            'participant.booking.trailOut.checkpoints', // ← BARU
+            'participant.booking.participants',
         ])->where('qr_token', $token)->first();
 
         if (!$qrPass) {
             return response()->json(['error' => 'QR token tidak ditemukan.'], 404);
         }
 
-        $booking     = $qrPass->participant->booking;
-        $checkpoints = $booking->trail->checkpoints->sortBy('order_seq');
+        $booking = $qrPass->participant->booking;
+        $reg     = $booking->mountain->regulation;
+        $days    = $booking->start_date->diffInDays($booking->end_date) + 1;
+        $paxCount = $booking->participants->count();
 
-        // Track which checkpoints have been scanned, per direction
+        // Hitung rincian biaya
+        $trailFee      = $reg ? ($reg->base_price ?? 0) : 0;
+        $crossTrailFee = 0; // kolom cross_trail_extra_fee belum ada di mountain_regulations
+        $guideTotal    = ($booking->guide_requested && $reg)
+            ? ($reg->guide_price_per_day ?? 0) * $days
+            : 0;
+
+        // Kumpulkan semua checkpoint dari trail naik + trail turun (jika lintas jalur)
+        $trailInCheckpoints  = $booking->trail->checkpoints->sortBy('order_seq');
+        $trailOutCheckpoints = $booking->is_cross_trail && $booking->trailOut
+            ? $booking->trailOut->checkpoints->sortBy('order_seq')
+            : collect();
+
+        // Gabung, deduplicate berdasarkan id
+        $allCheckpoints = $trailInCheckpoints->concat($trailOutCheckpoints)->unique('id');
+
+        // Scan logs existing
         $scannedLogs = TrekkingLog::where('qr_pass_id', $qrPass->id)
             ->get(['trail_checkpoint_id', 'direction']);
 
@@ -57,19 +81,33 @@ class SimulateScanController extends Controller
                 'role' => $qrPass->participant->role,
             ],
             'booking' => [
-                'code'       => $booking->booking_code,
-                'mountain'   => $booking->mountain->name,
-                'trail'      => $booking->trail->name,
-                'start_date' => $booking->start_date->format('d M Y'),
-                'end_date'   => $booking->end_date->format('d M Y'),
-                'status'     => $booking->status,
+                'code'           => $booking->booking_code,
+                'mountain'       => $booking->mountain->name,
+                'trail_in'       => $booking->trail->name,
+                'trail_out'      => $booking->effectiveTrailOut()->name,
+                'is_cross_trail' => $booking->is_cross_trail,
+                'start_date'     => $booking->start_date->format('d M Y'),
+                'end_date'       => $booking->end_date->format('d M Y'),
+                'status'         => $booking->status,
+                'days'           => $days,
+                'pax_count'      => $paxCount,
+                'guide_requested'=> $booking->guide_requested,
+                'total_price'    => (float) $booking->total_price,
+                'fee_breakdown'  => [
+                    'base_price' => (float) $trailFee,
+                    'cross_trail_fee'      => (float) $crossTrailFee,
+                    'guide_total'          => (float) $guideTotal,
+                    'guide_price_per_day'  => $reg ? (float) ($reg->guide_price_per_day ?? 0) : 0,
+                ],
             ],
-            'checkpoints' => $checkpoints->map(fn($cp) => [
+            'checkpoints' => $allCheckpoints->map(fn($cp) => [
                 'id'          => $cp->id,
                 'name'        => $cp->name,
                 'type'        => $cp->type,
                 'order'       => $cp->order_seq,
                 'altitude'    => $cp->altitude,
+                'trail_id'    => $cp->trail_id,            // ← BARU: untuk UI label jalur
+                'trail_role'  => $this->checkpointTrailRole($cp, $booking), // ← BARU: 'in'|'out'|'shared'
                 'scanned_up'   => in_array($cp->id, $scannedUp),
                 'scanned_down' => in_array($cp->id, $scannedDown),
             ])->values(),
@@ -77,7 +115,29 @@ class SimulateScanController extends Controller
     }
 
     /**
-     * Record a scan — create a TrekkingLog entry.
+     * Tandai apakah checkpoint ini bagian dari jalur naik, turun, atau keduanya.
+     */
+    private function checkpointTrailRole(TrailCheckpoint $cp, $booking): string
+    {
+        $isInTrail  = $cp->trail_id === $booking->trail_id;
+        $isOutTrail = $booking->is_cross_trail && $cp->trail_id === $booking->trail_out_id;
+
+        if ($isInTrail && $isOutTrail) return 'shared';
+        if ($isInTrail) return 'in';
+        if ($isOutTrail) return 'out';
+
+        // Cek via shared_checkpoint_group
+        if ($cp->shared_checkpoint_group) return 'shared';
+
+        return 'unknown';
+    }
+
+    /**
+     * Record scan — mendukung lintas jalur.
+     *
+     * PERUBAHAN:
+     * - Gunakan Booking::isCheckpointValid() untuk validasi.
+     * - Penyelesaian booking cek effectiveTrailOut().
      */
     public function record(Request $request)
     {
@@ -87,10 +147,22 @@ class SimulateScanController extends Controller
             'direction'           => 'required|in:up,down',
         ]);
 
-        $qrPass     = QrPass::with('participant.booking')->findOrFail($request->qr_pass_id);
+        $qrPass     = QrPass::with('participant.booking.trail', 'participant.booking.trailOut')
+            ->findOrFail($request->qr_pass_id);
         $checkpoint = TrailCheckpoint::findOrFail($request->trail_checkpoint_id);
         $booking    = $qrPass->participant->booking;
         $direction  = $request->direction;
+
+        // Deteksi anomali checkpoint di luar rute
+        $anomalyFlag   = false;
+        $anomalyReason = null;
+
+        if (!$booking->isCheckpointValid($checkpoint)) {
+            $anomalyFlag   = true;
+            $anomalyReason = "Checkpoint '{$checkpoint->name}' di luar rute booking."
+                . " Rute: {$booking->trail->name}"
+                . ($booking->is_cross_trail ? " → {$booking->effectiveTrailOut()->name}" : "");
+        }
 
         TrekkingLog::create([
             'qr_pass_id'          => $qrPass->id,
@@ -98,9 +170,11 @@ class SimulateScanController extends Controller
             'direction'           => $direction,
             'scanned_at'          => now(),
             'scanned_by_user_id'  => Auth::id(),
+            'anomaly_flag'        => $anomalyFlag,
+            'anomaly_reason'      => $anomalyReason,
         ]);
 
-        // Scan gate_in naik → aktifkan QR pass & booking
+        // Aktifkan QR & booking di gate_in arah naik
         if ($qrPass->status === 'inactive') {
             $qrPass->update(['status' => 'active']);
         }
@@ -108,21 +182,28 @@ class SimulateScanController extends Controller
             $booking->update(['status' => 'active']);
         }
 
-        // Scan gate_out turun → selesaikan booking & QR pass
-        if ($checkpoint->type === 'gate_out' && $direction === 'down') {
+        // SELESAI: cek gate_out pada effectiveTrailOut — bukan trail naik
+        if ($checkpoint->type === 'gate_out'
+            && $direction === 'down'
+            && $checkpoint->trail_id === $booking->effectiveTrailOut()->id) {
             $qrPass->update(['status' => 'used']);
             $booking->update(['status' => 'completed']);
         }
 
         return response()->json([
-            'success'        => true,
-            'message'        => 'Scan berhasil dicatat.',
-            'checkpoint'     => $checkpoint->name,
-            'checkpoint_type'=> $checkpoint->type,
-            'direction'      => $direction,
-            'scanned_at'     => now()->format('d M Y, H:i:s'),
-            'booking_status' => $booking->fresh()->status,
-            'qr_status'      => $qrPass->fresh()->status,
+            'success'         => true,
+            'message'         => $anomalyFlag
+                ? 'Scan dicatat dengan flag anomali.'
+                : 'Scan berhasil dicatat.',
+            'anomaly'         => $anomalyFlag,
+            'anomaly_reason'  => $anomalyReason,
+            'checkpoint'      => $checkpoint->name,
+            'checkpoint_type' => $checkpoint->type,
+            'direction'       => $direction,
+            'trail_role'      => $this->checkpointTrailRole($checkpoint, $booking),
+            'scanned_at'      => now()->format('d M Y, H:i:s'),
+            'booking_status'  => $booking->fresh()->status,
+            'qr_status'       => $qrPass->fresh()->status,
         ]);
     }
 }

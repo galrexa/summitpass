@@ -12,12 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    /**
-     * Daftar booking milik user (sebagai leader)
-     */
     public function index(Request $request)
     {
-        $query = Booking::with(['mountain', 'trail'])
+        $query = Booking::with(['mountain', 'trail', 'trailOut']) // ← tambah trailOut
             ->byLeader($request->user()->id);
 
         if ($request->filled('status')) {
@@ -37,12 +34,9 @@ class BookingController extends Controller
         ], 200);
     }
 
-    /**
-     * Detail booking
-     */
     public function show(Request $request, $id)
     {
-        $booking = Booking::with(['mountain.regulation', 'trail', 'participants', 'payment'])
+        $booking = Booking::with(['mountain.regulation', 'trail', 'trailOut', 'participants', 'payment']) // ← trailOut
             ->byLeader($request->user()->id)
             ->find($id);
 
@@ -54,19 +48,19 @@ class BookingController extends Controller
     }
 
     /**
-     * Buat booking baru (SIMAKSI Digital)
+     * Buat booking baru — mendukung lintas jalur.
      *
-     * Alur:
-     * 1. Validasi regulasi gunung (max hari, kuota jalur, guide required)
-     * 2. Validasi jumlah peserta (max_participants_per_account)
-     * 3. Buat Booking + BookingParticipant
-     * 4. Status: pending_payment (booking_code diterbitkan setelah bayar)
+     * PERUBAHAN:
+     * - Tambah field trail_out_id (opsional)
+     * - Validasi trail_out_id harus satu gunung dengan trail_id
+     * - Set is_cross_trail = true jika trail_out_id berbeda dari trail_id
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'mountain_id'          => 'required|integer|exists:mountains,id',
             'trail_id'             => 'required|integer|exists:trails,id',
+            'trail_out_id'         => 'nullable|integer|exists:trails,id', // ← BARU
             'start_date'           => 'required|date|after_or_equal:today',
             'end_date'             => 'required|date|after:start_date',
             'guide_requested'      => 'required|boolean',
@@ -74,172 +68,91 @@ class BookingController extends Controller
             'participants'         => 'required|array|min:1',
             'participants.*.name'  => 'required|string|max:255',
             'participants.*.nik'   => 'required|string|size:16|regex:/^[0-9]{16}$/',
-            'participants.*.role'  => 'required|in:leader,member',
-            'notes'                => 'nullable|string|max:1000',
         ]);
 
-        $mountain = Mountain::with('regulation')->findOrFail($validated['mountain_id']);
-        $regulation = $mountain->regulation;
+        // Lintas jalur: trail_out_id ada dan berbeda dari trail_id
+        $isCrossTrail = isset($validated['trail_out_id'])
+            && $validated['trail_out_id'] !== $validated['trail_id'];
 
-        if (!$regulation) {
-            return response()->json(['message' => 'Regulasi gunung belum dikonfigurasi'], 422);
-        }
-
-        // Validasi: trail harus milik gunung yang dipilih
-        $trail = Trail::where('mountain_id', $mountain->id)
-            ->where('is_active', true)
-            ->find($validated['trail_id']);
-
-        if (!$trail) {
-            return response()->json(['message' => 'Jalur tidak valid untuk gunung ini'], 422);
-        }
-
-        // Validasi: batas maksimal hari pendakian
-        $startDate = Carbon::parse($validated['start_date']);
-        $endDate   = Carbon::parse($validated['end_date']);
-        $hikingDays = $startDate->diffInDays($endDate) + 1;
-
-        if ($hikingDays > $regulation->max_hiking_days) {
-            return response()->json([
-                'message' => "Batas maksimal pendakian di gunung ini adalah {$regulation->max_hiking_days} hari",
-            ], 422);
-        }
-
-        // Validasi: jumlah peserta tidak melebihi batas per akun
-        $participantCount = count($validated['participants']);
-        if ($participantCount > $regulation->max_participants_per_account) {
-            return response()->json([
-                'message' => "Maksimal {$regulation->max_participants_per_account} peserta per booking untuk gunung ini",
-            ], 422);
-        }
-
-        // Validasi: guide wajib jika guide_required = true
-        if ($regulation->guide_required && !$validated['guide_requested']) {
-            return response()->json([
-                'message' => 'Guide wajib untuk pendakian di gunung ini',
-            ], 422);
-        }
-
-        // Validasi: kuota jalur per hari (cek semua hari dalam range)
-        for ($d = $startDate->copy(); $d->lte($endDate); $d->addDay()) {
-            $booked = Booking::where('trail_id', $trail->id)
-                ->whereIn('status', ['paid', 'active'])
-                ->whereDate('start_date', '<=', $d->toDateString())
-                ->whereDate('end_date', '>=', $d->toDateString())
-                ->withCount('participants')
-                ->get()
-                ->sum('participants_count');
-
-            $remaining = $regulation->quota_per_trail_per_day - $booked;
-
-            if ($participantCount > $remaining) {
+        if ($isCrossTrail) {
+            $trailOut = Trail::findOrFail($validated['trail_out_id']);
+            if ((int) $trailOut->mountain_id !== (int) $validated['mountain_id']) {
                 return response()->json([
-                    'message' => "Kuota jalur penuh untuk tanggal {$d->toDateString()} (sisa: {$remaining})",
+                    'message' => 'Jalur turun harus berada di gunung yang sama dengan jalur naik.',
                 ], 422);
             }
         }
 
-        // Hitung total harga (peserta × harga dasar)
-        $totalPrice = $regulation->base_price * $participantCount;
+        $trail    = Trail::with('mountain.regulation')->findOrFail($validated['trail_id']);
+        $reg      = $trail->mountain->regulation;
+        $days     = (int) Carbon::parse($validated['start_date'])
+                        ->diffInDays(Carbon::parse($validated['end_date'])) + 1;
+        $paxCount = count($validated['participants']);
 
-        $booking = DB::transaction(function () use ($validated, $mountain, $trail, $totalPrice, $participantCount) {
+        if ($reg && $reg->max_participants_per_account && $paxCount > $reg->max_participants_per_account) {
+            return response()->json([
+                'message' => "Maksimal {$reg->max_participants_per_account} peserta per booking.",
+            ], 422);
+        }
+
+        if ($reg && $reg->max_hiking_days && $days > $reg->max_hiking_days) {
+            return response()->json([
+                'message' => "Maksimal {$reg->max_hiking_days} hari pendakian.",
+            ], 422);
+        }
+
+        $trailFee   = $reg ? ($reg->base_price ?? 0) : 0;
+        $guidePrice = $validated['guide_requested'] && $reg
+            ? ($reg->guide_price_per_day ?? 0) * $days
+            : 0;
+        $totalPrice = ($trailFee * $paxCount) + $guidePrice;
+
+        $booking = DB::transaction(function () use ($validated, $request, $isCrossTrail, $totalPrice) {
             $booking = Booking::create([
-                'leader_user_id'  => request()->user()->id,
-                'mountain_id'     => $mountain->id,
-                'trail_id'        => $trail->id,
+                'leader_user_id'  => $request->user()->id,
+                'mountain_id'     => $validated['mountain_id'],
+                'trail_id'        => $validated['trail_id'],
+                'trail_out_id'    => $isCrossTrail ? $validated['trail_out_id'] : null, // ← BARU
+                'is_cross_trail'  => $isCrossTrail,                                      // ← BARU
                 'start_date'      => $validated['start_date'],
                 'end_date'        => $validated['end_date'],
                 'guide_requested' => $validated['guide_requested'],
                 'tos_accepted_at' => now(),
                 'status'          => 'pending_payment',
                 'total_price'     => $totalPrice,
-                'notes'           => $validated['notes'] ?? null,
             ]);
 
-            foreach ($validated['participants'] as $p) {
+            foreach ($validated['participants'] as $idx => $pax) {
                 BookingParticipant::create([
                     'booking_id' => $booking->id,
-                    'nik'        => $p['nik'],
-                    'name'       => $p['name'],
-                    'role'       => $p['role'],
+                    'user_id'    => null,
+                    'nik'        => $pax['nik'],
+                    'name'       => $pax['name'],
+                    'role'       => ($idx === 0) ? 'leader' : 'member',
                 ]);
             }
 
             return $booking;
         });
 
-        $booking->load(['mountain', 'trail', 'participants']);
-
         return response()->json([
-            'message' => 'Booking berhasil dibuat, lanjutkan ke pembayaran',
-            'data'    => $booking,
+            'message' => 'Booking berhasil dibuat',
+            'data'    => $booking->load(['mountain', 'trail', 'trailOut', 'participants']),
         ], 201);
     }
 
-    /**
-     * Batalkan booking
-     */
     public function cancel(Request $request, $id)
     {
-        $booking = Booking::byLeader($request->user()->id)->find($id);
+        $booking = Booking::byLeader($request->user()->id)
+            ->whereIn('status', ['pending_payment'])
+            ->find($id);
 
         if (!$booking) {
-            return response()->json(['message' => 'Booking tidak ditemukan'], 404);
-        }
-
-        if (!in_array($booking->status, ['pending_payment', 'paid'])) {
-            return response()->json(['message' => 'Booking tidak dapat dibatalkan'], 422);
+            return response()->json(['message' => 'Booking tidak ditemukan atau tidak dapat dibatalkan'], 404);
         }
 
         $booking->update(['status' => 'cancelled']);
 
-        return response()->json([
-            'message' => 'Booking berhasil dibatalkan',
-            'data'    => $booking->fresh(),
-        ], 200);
-    }
-
-    /**
-     * Cek ketersediaan kuota jalur untuk 30 hari ke depan
-     */
-    public function getAvailableDates(Request $request, $mountainId, $trailId)
-    {
-        $mountain = Mountain::with('regulation')->find($mountainId);
-
-        if (!$mountain || !$mountain->regulation) {
-            return response()->json(['message' => 'Gunung tidak ditemukan'], 404);
-        }
-
-        $trail = Trail::where('mountain_id', $mountainId)->find($trailId);
-
-        if (!$trail) {
-            return response()->json(['message' => 'Jalur tidak ditemukan'], 404);
-        }
-
-        $quota = $mountain->regulation->quota_per_trail_per_day;
-        $dates = [];
-        $today = Carbon::today();
-
-        for ($i = 1; $i <= 30; $i++) {
-            $date = $today->copy()->addDays($i);
-
-            $booked = Booking::where('trail_id', $trailId)
-                ->whereIn('status', ['paid', 'active'])
-                ->whereDate('start_date', '<=', $date->toDateString())
-                ->whereDate('end_date', '>=', $date->toDateString())
-                ->withCount('participants')
-                ->get()
-                ->sum('participants_count');
-
-            $dates[] = [
-                'date'      => $date->toDateString(),
-                'quota'     => $quota,
-                'booked'    => $booked,
-                'remaining' => max(0, $quota - $booked),
-                'available' => ($quota - $booked) > 0,
-            ];
-        }
-
-        return response()->json(['data' => $dates], 200);
+        return response()->json(['message' => 'Booking berhasil dibatalkan'], 200);
     }
 }

@@ -24,12 +24,14 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        $roleId = \App\Models\UserRole::where('name', 'pendaki')->value('id');
+
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'phone'    => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
-            'role'     => 'pendaki',
+            'role_id'  => $roleId,
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -75,12 +77,14 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        $roleId = \App\Models\UserRole::where('name', 'pendaki')->value('id');
+
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'phone'    => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
-            'role'     => 'pendaki',
+            'role_id'  => $roleId,
         ]);
 
         Auth::login($user);
@@ -122,13 +126,15 @@ class AuthController extends Controller
             }
         } else {
             // Buat akun baru via Google (NIK/paspor kosong, wajib dilengkapi nanti)
+            $roleId = \App\Models\UserRole::where('name', 'pendaki')->value('id');
+
             $user = User::create([
                 'name'      => $googleUser->getName(),
                 'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'avatar'    => $googleUser->getAvatar(),
                 'password'  => null,
-                'role'      => 'pendaki',
+                'role_id'   => $roleId,
             ]);
         }
 
