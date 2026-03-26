@@ -21,7 +21,7 @@
                 <div class="text-sm" style="color:rgba(255,255,255,0.85);">{{ $mountain->location }}@if($mountain->province), {{ $mountain->province }}@endif</div>
                 <div class="flex items-center gap-3 mt-2">
                     <span style="background:rgba(255,255,255,0.15);padding:0.2rem 0.6rem;border-radius:999px;font-size:0.75rem;">{{ number_format($mountain->height_mdpl) }} mdpl</span>
-                    <span style="background:rgba(255,255,255,0.15);padding:0.2rem 0.6rem;border-radius:999px;font-size:0.75rem;">{{ $mountain->difficulty }}</span>
+                    <span style="background:rgba(255,255,255,0.15);padding:0.2rem 0.6rem;border-radius:999px;font-size:0.75rem;">Grade {{ $mountain->grade }}</span>
                     @if($mountain->is_active)
                     <span style="background:rgba(34,197,94,0.25);color:#86efac;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.75rem;">Aktif</span>
                     @else

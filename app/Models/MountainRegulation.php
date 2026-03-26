@@ -23,6 +23,8 @@ class MountainRegulation extends Model
         'max_hiking_days',
         'max_participants_per_account',
         'guide_required',
+        'guide_requirement_level',
+        'guide_ratio_max_hikers',
         'guide_price_per_day',
         'checkout_deadline_hour',
         'min_elevation_experience',
@@ -35,8 +37,9 @@ class MountainRegulation extends Model
         'price_foreign_weekend'    => 'decimal:2',
         'price_student'            => 'decimal:2',
         'price_student_weekend'    => 'decimal:2',
-        'guide_required'           => 'boolean',
-        'guide_price_per_day'      => 'decimal:2',
+        'guide_required'            => 'boolean',
+        'guide_ratio_max_hikers'    => 'integer',
+        'guide_price_per_day'       => 'decimal:2',
         'minor_must_be_accompanied'=> 'boolean',
         'checkout_deadline_hour'   => 'integer',
         'min_elevation_experience' => 'integer',
@@ -121,5 +124,20 @@ class MountainRegulation extends Model
     public function getFormattedBasePriceAttribute()
     {
         return 'Rp' . number_format($this->base_price, 0, ',', '.');
+    }
+
+    public function getGradeRequirementLabelAttribute(): string
+    {
+        return match($this->guide_requirement_level) {
+            'recommended' => 'Sangat Disarankan',
+            'mandatory'   => 'WAJIB (Bersertifikat)',
+            'expert_only' => 'WAJIB (Tenaga Ahli)',
+            default       => 'Tidak Wajib',
+        };
+    }
+
+    public function isGuideRequired(): bool
+    {
+        return in_array($this->guide_requirement_level, ['mandatory', 'expert_only']);
     }
 }

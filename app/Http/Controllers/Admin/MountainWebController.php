@@ -38,8 +38,8 @@ class MountainWebController extends Controller
             });
         }
 
-        if ($request->filled('difficulty')) {
-            $query->where('difficulty', $request->difficulty);
+        if ($request->filled('grade')) {
+            $query->where('grade', $request->grade);
         }
 
         $mountains = $query->orderBy('name')->paginate(15)->withQueryString();
@@ -70,7 +70,7 @@ class MountainWebController extends Controller
             'location'                        => 'required|string|max:255',
             'province'                        => 'nullable|string|max:100',
             'height_mdpl'                     => 'required|integer|min:0',
-            'difficulty'                      => 'required|in:Easy,Moderate,Hard',
+            'grade'                           => 'required|in:I,II,III,IV,V',
             'description'                     => 'nullable|string',
             'image_url'                       => 'nullable|url',
             'pengelola_id'                    => 'nullable|exists:users,id',
@@ -86,6 +86,8 @@ class MountainWebController extends Controller
             'max_hiking_days'                 => 'required|integer|min:1',
             'max_participants_per_account'    => 'required|integer|min:1',
             'guide_required'                  => 'nullable|boolean',
+            'guide_requirement_level'         => 'nullable|in:none,recommended,mandatory,expert_only',
+            'guide_ratio_max_hikers'          => 'nullable|integer|min:1',
             'guide_price_per_day'             => 'nullable|numeric|min:0',
             'checkout_deadline_hour'          => 'required|integer|between:0,23',
             'min_elevation_experience'        => 'nullable|integer|min:0',
@@ -97,7 +99,7 @@ class MountainWebController extends Controller
                 'location'     => $validated['location'],
                 'province'     => $validated['province'] ?? null,
                 'height_mdpl'  => $validated['height_mdpl'],
-                'difficulty'   => $validated['difficulty'],
+                'grade'        => $validated['grade'],
                 'description'  => $validated['description'] ?? null,
                 'image_url'    => $validated['image_url'] ?? null,
                 'is_active'    => true,
@@ -118,6 +120,8 @@ class MountainWebController extends Controller
                 'max_hiking_days'              => $validated['max_hiking_days'],
                 'max_participants_per_account' => $validated['max_participants_per_account'],
                 'guide_required'               => $request->boolean('guide_required'),
+                'guide_requirement_level'      => $validated['guide_requirement_level'] ?? 'none',
+                'guide_ratio_max_hikers'       => $validated['guide_ratio_max_hikers'] ?? null,
                 'guide_price_per_day'          => $validated['guide_price_per_day'] ?? null,
                 'checkout_deadline_hour'       => $validated['checkout_deadline_hour'],
                 'min_elevation_experience'     => $validated['min_elevation_experience'] ?? null,
@@ -160,7 +164,7 @@ class MountainWebController extends Controller
             'location'                        => 'required|string|max:255',
             'province'                        => 'nullable|string|max:100',
             'height_mdpl'                     => 'required|integer|min:0',
-            'difficulty'                      => 'required|in:Easy,Moderate,Hard',
+            'grade'                           => 'required|in:I,II,III,IV,V',
             'description'                     => 'nullable|string',
             'image_url'                       => 'nullable|url',
             'is_active'                       => 'nullable|boolean',
@@ -177,6 +181,8 @@ class MountainWebController extends Controller
             'max_hiking_days'                 => 'required|integer|min:1',
             'max_participants_per_account'    => 'required|integer|min:1',
             'guide_required'                  => 'nullable|boolean',
+            'guide_requirement_level'         => 'nullable|in:none,recommended,mandatory,expert_only',
+            'guide_ratio_max_hikers'          => 'nullable|integer|min:1',
             'guide_price_per_day'             => 'nullable|numeric|min:0',
             'checkout_deadline_hour'          => 'required|integer|between:0,23',
             'min_elevation_experience'        => 'nullable|integer|min:0',
@@ -188,7 +194,7 @@ class MountainWebController extends Controller
                 'location'    => $validated['location'],
                 'province'    => $validated['province'] ?? null,
                 'height_mdpl' => $validated['height_mdpl'],
-                'difficulty'  => $validated['difficulty'],
+                'grade'       => $validated['grade'],
                 'description' => $validated['description'] ?? null,
                 'image_url'   => $validated['image_url'] ?? null,
                 'is_active'   => $request->boolean('is_active'),
@@ -216,6 +222,8 @@ class MountainWebController extends Controller
                     'max_hiking_days'              => $validated['max_hiking_days'],
                     'max_participants_per_account' => $validated['max_participants_per_account'],
                     'guide_required'               => $request->boolean('guide_required'),
+                    'guide_requirement_level'      => $validated['guide_requirement_level'] ?? 'none',
+                    'guide_ratio_max_hikers'       => $validated['guide_ratio_max_hikers'] ?? null,
                     'guide_price_per_day'          => $validated['guide_price_per_day'] ?? null,
                     'checkout_deadline_hour'       => $validated['checkout_deadline_hour'],
                     'min_elevation_experience'     => $validated['min_elevation_experience'] ?? null,
@@ -249,10 +257,14 @@ class MountainWebController extends Controller
         $this->authorizeForMountain($mountain);
 
         $validated = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'route_order'   => 'required|integer|min:1',
-            'quota_per_day' => 'nullable|integer|min:1',
+            'name'             => 'required|string|max:255',
+            'grade'            => 'nullable|in:I,II,III,IV,V',
+            'length_km'        => 'nullable|numeric|min:0',
+            'elevation_gain_m' => 'nullable|integer|min:0',
+            'surface_type'     => 'nullable|in:tanah,batu,pasir,campuran',
+            'description'      => 'nullable|string',
+            'route_order'      => 'required|integer|min:1',
+            'quota_per_day'    => 'nullable|integer|min:1',
         ]);
 
         $trail = $mountain->trails()->create(array_merge($validated, ['is_active' => true]));
@@ -269,19 +281,27 @@ class MountainWebController extends Controller
         $trail = Trail::where('mountain_id', $mountainId)->findOrFail($trailId);
 
         $validated = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'route_order'   => 'required|integer|min:1',
-            'is_active'     => 'nullable|boolean',
-            'quota_per_day' => 'nullable|integer|min:1',
+            'name'             => 'required|string|max:255',
+            'grade'            => 'nullable|in:I,II,III,IV,V',
+            'length_km'        => 'nullable|numeric|min:0',
+            'elevation_gain_m' => 'nullable|integer|min:0',
+            'surface_type'     => 'nullable|in:tanah,batu,pasir,campuran',
+            'description'      => 'nullable|string',
+            'route_order'      => 'required|integer|min:1',
+            'is_active'        => 'nullable|boolean',
+            'quota_per_day'    => 'nullable|integer|min:1',
         ]);
 
         $trail->update([
-            'name'          => $validated['name'],
-            'description'   => $validated['description'] ?? null,
-            'route_order'   => $validated['route_order'],
-            'is_active'     => $request->boolean('is_active'),
-            'quota_per_day' => $validated['quota_per_day'] ?? null,
+            'name'             => $validated['name'],
+            'grade'            => $validated['grade'] ?? null,
+            'length_km'        => $validated['length_km'] ?? null,
+            'elevation_gain_m' => $validated['elevation_gain_m'] ?? null,
+            'surface_type'     => $validated['surface_type'] ?? null,
+            'description'      => $validated['description'] ?? null,
+            'route_order'      => $validated['route_order'],
+            'is_active'        => $request->boolean('is_active'),
+            'quota_per_day'    => $validated['quota_per_day'] ?? null,
         ]);
 
         return redirect()->route('admin.mountains.show', $mountainId)

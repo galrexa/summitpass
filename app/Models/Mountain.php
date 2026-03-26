@@ -14,7 +14,7 @@ class Mountain extends Model
         'location',
         'province',
         'height_mdpl',
-        'difficulty',
+        'grade',
         'description',
         'image_url',
         'is_active',
@@ -50,9 +50,9 @@ class Mountain extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeByDifficulty($query, $difficulty)
+    public function scopeByGrade($query, $grade)
     {
-        return $query->where('difficulty', $difficulty);
+        return $query->where('grade', $grade);
     }
 
     public function scopeSearch($query, $search)

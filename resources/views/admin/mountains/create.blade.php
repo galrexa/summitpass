@@ -35,14 +35,15 @@
                     </div>
 
                     <div>
-                        <label class="form-label">Tingkat Kesulitan <span style="color:#dc2626;">*</span></label>
-                        <select name="difficulty" class="form-input @error('difficulty') border-red-400 @enderror">
-                            <option value="">Pilih...</option>
-                            <option value="Easy" {{ old('difficulty') === 'Easy' ? 'selected' : '' }}>Easy</option>
-                            <option value="Moderate" {{ old('difficulty') === 'Moderate' ? 'selected' : '' }}>Moderate</option>
-                            <option value="Hard" {{ old('difficulty') === 'Hard' ? 'selected' : '' }}>Hard</option>
+                        <label class="form-label">Grade Jalur (Permen LHK 13/2024) <span style="color:#dc2626;">*</span></label>
+                        <select name="grade" class="form-input @error('grade') border-red-400 @enderror">
+                            <option value="">— Pilih Grade —</option>
+                            @foreach(['I','II','III','IV','V'] as $g)
+                            <option value="{{ $g }}" {{ old('grade') === $g ? 'selected' : '' }}>Grade {{ $g }}</option>
+                            @endforeach
                         </select>
-                        @error('difficulty')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Grade I–II: mudah, III: sedang, IV: sulit (wajib pemandu bersertifikat), V: sangat sulit (wajib tenaga ahli).</p>
+                        @error('grade')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="sm:col-span-2">
@@ -167,11 +168,27 @@
                         <p class="text-xs mt-1" style="color:var(--color-text-muted);">Flat rate per hari (bukan per orang). Ditambahkan ke total harga jika pendaki memilih pakai guide.</p>
                     </div>
 
+                    <div>
+                        <label class="form-label">Level Kewajiban Pemandu (Permen LHK 13/2024)</label>
+                        <select name="guide_requirement_level" class="form-input">
+                            <option value="none" {{ old('guide_requirement_level', 'none') === 'none' ? 'selected' : '' }}>Tidak Wajib (Grade I & II)</option>
+                            <option value="recommended" {{ old('guide_requirement_level') === 'recommended' ? 'selected' : '' }}>Sangat Disarankan (Grade III)</option>
+                            <option value="mandatory" {{ old('guide_requirement_level') === 'mandatory' ? 'selected' : '' }}>WAJIB Bersertifikat (Grade IV)</option>
+                            <option value="expert_only" {{ old('guide_requirement_level') === 'expert_only' ? 'selected' : '' }}>WAJIB Tenaga Ahli (Grade V)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Rasio Maks. Pendaki per Pemandu</label>
+                        <input type="number" name="guide_ratio_max_hikers" value="{{ old('guide_ratio_max_hikers', 7) }}" class="form-input" min="1" placeholder="cth. 7">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Maks. jumlah pendaki per 1 pemandu. Kosongkan = tidak ada rasio.</p>
+                    </div>
+
                     <div class="flex items-center gap-3 pt-5">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="guide_required" value="1" {{ old('guide_required') ? 'checked' : '' }}
                                    style="width:16px;height:16px;accent-color:var(--color-forest-600);">
-                            <span class="text-sm font-medium" style="color:var(--color-text);">Guide wajib</span>
+                            <span class="text-sm font-medium" style="color:var(--color-text);">Guide wajib (legacy)</span>
                         </label>
                     </div>
 

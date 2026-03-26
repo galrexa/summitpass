@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
             'location'    => 'Lombok Utara',
             'province'    => 'Nusa Tenggara Barat',
             'height_mdpl' => 3726,
-            'difficulty'  => 'Hard',
+            'grade'       => 'IV',
             'description' => 'Gunung berapi aktif tertinggi kedua di Indonesia, terletak di Pulau Lombok.',
             'is_active'   => true,
         ]);
@@ -101,7 +101,7 @@ class DatabaseSeeder extends Seeder
             'location'    => 'Cianjur / Sukabumi',
             'province'    => 'Jawa Barat',
             'height_mdpl' => 2958,
-            'difficulty'  => 'Moderate',
+            'grade'       => 'III',
             'description' => 'Gunung populer di Taman Nasional Gunung Gede Pangrango.',
             'is_active'   => true,
         ]);

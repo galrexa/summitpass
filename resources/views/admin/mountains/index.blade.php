@@ -26,16 +26,16 @@
                 <input type="text" name="search" value="{{ request('search') }}" class="form-input" placeholder="Nama atau lokasi gunung...">
             </div>
             <div>
-                <label class="form-label">Tingkat Kesulitan</label>
-                <select name="difficulty" class="form-input">
+                <label class="form-label">Grade</label>
+                <select name="grade" class="form-input">
                     <option value="">Semua</option>
-                    <option value="Easy" {{ request('difficulty') === 'Easy' ? 'selected' : '' }}>Easy</option>
-                    <option value="Moderate" {{ request('difficulty') === 'Moderate' ? 'selected' : '' }}>Moderate</option>
-                    <option value="Hard" {{ request('difficulty') === 'Hard' ? 'selected' : '' }}>Hard</option>
+                    @foreach(['I','II','III','IV','V'] as $g)
+                    <option value="{{ $g }}" {{ request('grade') === $g ? 'selected' : '' }}>Grade {{ $g }}</option>
+                    @endforeach
                 </select>
             </div>
             <button type="submit" class="btn btn-outline">Filter</button>
-            @if(request('search') || request('difficulty'))
+            @if(request('search') || request('grade'))
             <a href="{{ route('admin.mountains.index') }}" class="btn btn-ghost">Reset</a>
             @endif
         </div>
@@ -50,7 +50,7 @@
                         <th>Gunung</th>
                         <th>Lokasi</th>
                         <th>Ketinggian</th>
-                        <th>Kesulitan</th>
+                        <th>Grade</th>
                         <th>Jalur</th>
                         <th>Kuota/Jalur/Hari</th>
                         <th>Harga Dasar</th>
@@ -61,7 +61,7 @@
                 <tbody>
                     @forelse($mountains as $mountain)
                     @php
-                    $diffColor = ['Easy' => 'badge-green', 'Moderate' => 'badge-yellow', 'Hard' => 'badge-red'][$mountain->difficulty] ?? 'badge-gray';
+                    $diffColor = ['I' => 'badge-green', 'II' => 'badge-green', 'III' => 'badge-yellow', 'IV' => 'badge-red', 'V' => 'badge-red'][$mountain->grade] ?? 'badge-gray';
                     @endphp
                     <tr>
                         <td>
@@ -76,7 +76,7 @@
                             @endif
                         </td>
                         <td class="text-sm">{{ number_format($mountain->height_mdpl) }} mdpl</td>
-                        <td><span class="badge {{ $diffColor }}">{{ $mountain->difficulty }}</span></td>
+                        <td><span class="badge {{ $diffColor }}">Grade {{ $mountain->grade }}</span></td>
                         <td class="text-sm">{{ $mountain->trails_count }}</td>
                         <td class="text-sm">{{ $mountain->regulation?->quota_per_trail_per_day ?? '—' }}</td>
                         <td class="text-sm">

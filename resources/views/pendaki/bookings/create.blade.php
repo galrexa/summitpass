@@ -80,11 +80,11 @@
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
                     @foreach($mountains as $mountain)
                     @php
-                        $diffMap   = ['easy'=>['Mudah','#dcfce7','#15803d'],'medium'=>['Sedang','#fef3c7','#b45309'],'hard'=>['Sulit','#fee2e2','#dc2626']];
-                        [$diffLabel,$diffBg,$diffFg] = $diffMap[$mountain->difficulty] ?? [$mountain->difficulty,'#f3f4f6','#374151'];
-                        // Gradient per difficulty for card header
-                        $gradients = ['easy'=>'linear-gradient(135deg,#166534 0%,#14532d 100%)','medium'=>'linear-gradient(135deg,#92400e 0%,#78350f 100%)','hard'=>'linear-gradient(135deg,#991b1b 0%,#7f1d1d 100%)'];
-                        $grad = $gradients[$mountain->difficulty] ?? 'linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%)';
+                        $gradeMap = ['I'=>['Grade I','#dcfce7','#15803d'],'II'=>['Grade II','#dcfce7','#15803d'],'III'=>['Grade III','#fef3c7','#b45309'],'IV'=>['Grade IV','#fee2e2','#dc2626'],'V'=>['Grade V','#fef2f2','#991b1b']];
+                        [$diffLabel,$diffBg,$diffFg] = $gradeMap[$mountain->grade] ?? ['Grade '.$mountain->grade,'#f3f4f6','#374151'];
+                        // Gradient per grade for card header
+                        $gradients = ['I'=>'linear-gradient(135deg,#166534 0%,#14532d 100%)','II'=>'linear-gradient(135deg,#166534 0%,#14532d 100%)','III'=>'linear-gradient(135deg,#92400e 0%,#78350f 100%)','IV'=>'linear-gradient(135deg,#991b1b 0%,#7f1d1d 100%)','V'=>'linear-gradient(135deg,#450a0a 0%,#1c0808 100%)'];
+                        $grad = $gradients[$mountain->grade] ?? 'linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%)';
                     @endphp
                     <div
                         @click="selectMountain({{ $mountain->id }}, '{{ addslashes($mountain->name) }}', {{ $mountain->regulation?->base_price ?? 0 }}, {{ $mountain->regulation?->max_participants_per_account ?? 10 }}, {{ $mountain->regulation?->max_hiking_days ?? 7 }})"
@@ -202,7 +202,7 @@
                             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;">
                                 <template x-for="(trail, idx) in trails" :key="trail.id">
                                     <div
-                                        @click="selectedTrailId = trail.id"
+                                        @click="selectedTrailId = trail.id; selectedTrailGrade = trail.grade || null"
                                         style="border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.07);"
                                         :style="selectedTrailId == trail.id
                                             ? 'transform:translateY(-2px);box-shadow:0 0 0 3px #166534,0 6px 16px rgba(22,101,52,.18);'
@@ -308,6 +308,22 @@
 
                 {{-- Guide --}}
                 <div style="margin-top:1rem;padding:.875rem 1rem;border:1px solid var(--color-border);border-radius:10px;">
+                    {{-- Grade III warning --}}
+                    <div x-show="selectedTrailGrade === 'III'"
+                         style="display:none;margin-bottom:.75rem;padding:.625rem .875rem;background:#fefce8;border:1px solid #fde047;border-radius:8px;">
+                        <p style="font-size:.8rem;font-weight:600;color:#854d0e;">⚠ Jalur Grade III — Sangat disarankan menggunakan pemandu berpengalaman.</p>
+                    </div>
+                    {{-- Grade IV warning --}}
+                    <div x-show="selectedTrailGrade === 'IV'"
+                         style="display:none;margin-bottom:.75rem;padding:.625rem .875rem;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;">
+                        <p style="font-size:.8rem;font-weight:600;color:#991b1b;">🚫 Jalur Grade IV — WAJIB menggunakan pemandu bersertifikat. Booking tidak dapat diproses tanpa pemandu.</p>
+                    </div>
+                    {{-- Grade V warning --}}
+                    <div x-show="selectedTrailGrade === 'V'"
+                         style="display:none;margin-bottom:.75rem;padding:.625rem .875rem;background:#450a0a;border:1px solid #dc2626;border-radius:8px;">
+                        <p style="font-size:.8rem;font-weight:600;color:#fca5a5;">🚫 Jalur Grade V — WAJIB menggunakan tenaga ahli/pemandu bersertifikasi khusus.</p>
+                    </div>
+
                     <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;">
                         <input type="checkbox" name="guide_requested" value="1" x-model="guideRequested"
                                style="width:16px;height:16px;accent-color:var(--color-forest-600);">
@@ -485,6 +501,7 @@
             startDate: '',
             endDate: '',
             guideRequested: false,
+            selectedTrailGrade: null,
             tosAccepted: false,
             _fp: null,
             participants: [
@@ -518,6 +535,7 @@
                 this.loadingTrails = true;
                 this.trails = [];
                 this.selectedTrailId = null;
+                this.selectedTrailGrade = null;
                 try {
                     const r = await fetch(`/api/mountains/${this.selectedMountainId}/trails`);
                     this.trails = await r.json();

@@ -35,12 +35,15 @@
                     </div>
 
                     <div>
-                        <label class="form-label">Tingkat Kesulitan <span style="color:#dc2626;">*</span></label>
-                        <select name="difficulty" class="form-input">
-                            @foreach(['Easy','Moderate','Hard'] as $d)
-                            <option value="{{ $d }}" {{ old('difficulty', $mountain->difficulty) === $d ? 'selected' : '' }}>{{ $d }}</option>
+                        <label class="form-label">Grade Jalur (Permen LHK 13/2024) <span style="color:#dc2626;">*</span></label>
+                        <select name="grade" class="form-input @error('grade') border-red-400 @enderror">
+                            <option value="">— Pilih Grade —</option>
+                            @foreach(['I','II','III','IV','V'] as $g)
+                            <option value="{{ $g }}" {{ old('grade', $mountain->grade) === $g ? 'selected' : '' }}>Grade {{ $g }}</option>
                             @endforeach
                         </select>
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Grade I–II: mudah, III: sedang, IV: sulit (wajib pemandu bersertifikat), V: sangat sulit (wajib tenaga ahli).</p>
+                        @error('grade')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="sm:col-span-2">
@@ -185,11 +188,28 @@
                         @error('guide_price_per_day')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
 
+                    <div>
+                        <label class="form-label">Level Kewajiban Pemandu (Permen LHK 13/2024)</label>
+                        <select name="guide_requirement_level" class="form-input">
+                            @php $currentLevel = old('guide_requirement_level', $reg?->guide_requirement_level ?? 'none'); @endphp
+                            <option value="none" {{ $currentLevel === 'none' ? 'selected' : '' }}>Tidak Wajib (Grade I & II)</option>
+                            <option value="recommended" {{ $currentLevel === 'recommended' ? 'selected' : '' }}>Sangat Disarankan (Grade III)</option>
+                            <option value="mandatory" {{ $currentLevel === 'mandatory' ? 'selected' : '' }}>WAJIB Bersertifikat (Grade IV)</option>
+                            <option value="expert_only" {{ $currentLevel === 'expert_only' ? 'selected' : '' }}>WAJIB Tenaga Ahli (Grade V)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Rasio Maks. Pendaki per Pemandu</label>
+                        <input type="number" name="guide_ratio_max_hikers" value="{{ old('guide_ratio_max_hikers', $reg?->guide_ratio_max_hikers ?? 7) }}" class="form-input" min="1" placeholder="cth. 7">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Maks. jumlah pendaki per 1 pemandu. Kosongkan = tidak ada rasio.</p>
+                    </div>
+
                     <div class="flex items-center gap-3 pt-5">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="guide_required" value="1" {{ old('guide_required', $reg?->guide_required) ? 'checked' : '' }}
                                    style="width:16px;height:16px;accent-color:var(--color-forest-600);">
-                            <span class="text-sm font-medium" style="color:var(--color-text);">Guide wajib</span>
+                            <span class="text-sm font-medium" style="color:var(--color-text);">Guide wajib (legacy)</span>
                         </label>
                     </div>
 

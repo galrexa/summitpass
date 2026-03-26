@@ -12,7 +12,10 @@
                 @else
                 <span class="badge badge-gray">Nonaktif</span>
                 @endif
-                <span class="badge {{ ['Easy'=>'badge-green','Moderate'=>'badge-yellow','Hard'=>'badge-red'][$mountain->difficulty] ?? 'badge-gray' }}">{{ $mountain->difficulty }}</span>
+                @php
+                    $gradeBadge = ['I'=>'badge-green','II'=>'badge-green','III'=>'badge-yellow','IV'=>'badge-red','V'=>'badge-red'][$mountain->grade] ?? 'badge-gray';
+                @endphp
+                <span class="badge {{ $gradeBadge }}">Grade {{ $mountain->grade }}</span>
             </div>
             <p class="text-sm" style="color:var(--color-text-muted);">
                 {{ $mountain->location }}{{ $mountain->province ? ', '.$mountain->province : '' }}
@@ -139,9 +142,15 @@
                     <span class="font-semibold">Pukul {{ str_pad($reg->checkout_deadline_hour, 2, '0', STR_PAD_LEFT) }}:00</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span style="color:var(--color-text-muted);">Guide wajib</span>
-                    <span class="font-semibold">{{ $reg->guide_required ? 'Ya' : 'Tidak' }}</span>
+                    <span style="color:var(--color-text-muted);">Kewajiban Pemandu</span>
+                    <span class="font-semibold">{{ $reg->grade_requirement_label }}</span>
                 </div>
+                @if($reg->guide_ratio_max_hikers)
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Rasio pemandu</span>
+                    <span class="font-semibold">1 : {{ $reg->guide_ratio_max_hikers }}</span>
+                </div>
+                @endif
                 <div class="flex justify-between text-sm">
                     <span style="color:var(--color-text-muted);">Biaya guide/hari</span>
                     <span class="font-semibold">
@@ -193,6 +202,15 @@
                     <input type="text" name="name" class="form-input" placeholder="cth. Ranu Pane" required>
                 </div>
                 <div>
+                    <label class="form-label">Grade (Permen LHK 13/2024)</label>
+                    <select name="grade" class="form-input">
+                        <option value="">— Belum —</option>
+                        @foreach(['I','II','III','IV','V'] as $g)
+                        <option value="{{ $g }}">Grade {{ $g }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label class="form-label">Urutan Rute <span style="color:#dc2626;">*</span></label>
                     <input type="number" name="route_order" class="form-input" value="{{ $mountain->trails->count() + 1 }}" min="1" required>
                 </div>
@@ -200,6 +218,26 @@
                     <label class="form-label">Kuota/Hari</label>
                     <input type="number" name="quota_per_day" class="form-input" min="1" placeholder="Default regulasi">
                     <p class="text-xs mt-0.5" style="color:var(--color-text-muted);">Kosongkan = pakai default</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
+                <div>
+                    <label class="form-label">Panjang Jalur (km)</label>
+                    <input type="number" name="length_km" class="form-input" step="0.01" min="0" placeholder="cth. 12.5">
+                </div>
+                <div>
+                    <label class="form-label">Beda Tinggi/Gain (m)</label>
+                    <input type="number" name="elevation_gain_m" class="form-input" min="0" placeholder="cth. 2300">
+                </div>
+                <div>
+                    <label class="form-label">Tipe Permukaan</label>
+                    <select name="surface_type" class="form-input">
+                        <option value="">— Belum —</option>
+                        <option value="tanah">Tanah</option>
+                        <option value="batu">Batu</option>
+                        <option value="pasir">Pasir</option>
+                        <option value="campuran">Campuran</option>
+                    </select>
                 </div>
                 <div>
                     <label class="form-label">Deskripsi</label>
@@ -221,6 +259,9 @@
             <div class="flex items-center gap-3">
                 <span class="text-xs font-bold px-2 py-0.5 rounded" style="background:var(--color-forest-700);color:white;">#{{ $trail->route_order }}</span>
                 <span class="font-semibold text-sm" style="color:var(--color-text);">{{ $trail->name }}</span>
+                @if($trail->grade)
+                <span class="badge badge-blue" style="font-size:0.65rem;">Grade {{ $trail->grade }}</span>
+                @endif
                 @if(!$trail->is_active)
                 <span class="badge badge-gray" style="font-size:0.65rem;">Nonaktif</span>
                 @endif
@@ -266,12 +307,40 @@
                         <input type="text" name="name" value="{{ $trail->name }}" class="form-input" required>
                     </div>
                     <div>
+                        <label class="form-label">Grade</label>
+                        <select name="grade" class="form-input">
+                            <option value="">— Belum —</option>
+                            @foreach(['I','II','III','IV','V'] as $g)
+                            <option value="{{ $g }}" {{ $trail->grade === $g ? 'selected' : '' }}>Grade {{ $g }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
                         <label class="form-label">Urutan</label>
                         <input type="number" name="route_order" value="{{ $trail->route_order }}" class="form-input" min="1" required>
                     </div>
                     <div>
                         <label class="form-label">Kuota/Hari</label>
                         <input type="number" name="quota_per_day" value="{{ $trail->quota_per_day }}" class="form-input" min="1" placeholder="Default regulasi">
+                    </div>
+                    <div>
+                        <label class="form-label">Panjang (km)</label>
+                        <input type="number" name="length_km" value="{{ $trail->length_km }}" class="form-input" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 items-end mt-2">
+                    <div>
+                        <label class="form-label">Gain (m)</label>
+                        <input type="number" name="elevation_gain_m" value="{{ $trail->elevation_gain_m }}" class="form-input" min="0">
+                    </div>
+                    <div>
+                        <label class="form-label">Permukaan</label>
+                        <select name="surface_type" class="form-input">
+                            <option value="">— Belum —</option>
+                            @foreach(['tanah','batu','pasir','campuran'] as $st)
+                            <option value="{{ $st }}" {{ $trail->surface_type === $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="form-label">Deskripsi</label>

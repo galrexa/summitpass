@@ -72,10 +72,10 @@
                     </div>
                     <div style="text-align:right;flex-shrink:0;">
                         @php
-                            $diffBadge = ['Easy' => ['#dcfce7','#16a34a'], 'Moderate' => ['#fef3c7','#d97706'], 'Hard' => ['#fee2e2','#dc2626']];
-                            [$bg,$cl] = $diffBadge[$mt?->difficulty ?? 'Easy'] ?? ['#f3f4f6','#6b7280'];
+                            $gradeBadge = ['I'=>['#dcfce7','#16a34a'],'II'=>['#dcfce7','#16a34a'],'III'=>['#fef3c7','#d97706'],'IV'=>['#fee2e2','#dc2626'],'V'=>['#fef2f2','#991b1b']];
+                            [$bg,$cl] = $gradeBadge[$mt?->grade ?? 'I'] ?? ['#f3f4f6','#6b7280'];
                         @endphp
-                        <span style="font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:20px;background:{{ $bg }};color:{{ $cl }};">{{ $mt?->difficulty }}</span>
+                        <span style="font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:20px;background:{{ $bg }};color:{{ $cl }};">Grade {{ $mt?->grade }}</span>
                         <div style="font-size:.72rem;color:#d97706;font-weight:700;margin-top:.25rem;">+{{ number_format($mt?->height_mdpl ?? 0) }} pts</div>
                     </div>
                 </div>

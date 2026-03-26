@@ -120,6 +120,19 @@ class BookingController extends Controller
                 ->withErrors(['participants' => 'Peserta di bawah 17 tahun wajib didampingi minimal 1 pendaki dewasa (≥ 17 tahun) dalam booking yang sama.']);
         }
 
+        // Validasi kewajiban guide berdasarkan level Permen LHK 13/2024
+        $guideRequested = $request->boolean('guide_requested');
+        if ($reg) {
+            $guideLevel = $reg->guide_requirement_level ?? 'none';
+
+            if (in_array($guideLevel, ['mandatory', 'expert_only']) && ! $guideRequested) {
+                $label = $guideLevel === 'expert_only'
+                    ? 'Jalur ini wajib menggunakan tenaga ahli/pemandu bersertifikasi khusus (Grade V).'
+                    : 'Jalur ini wajib menggunakan pemandu bersertifikat (Grade IV).';
+                return back()->withInput()->withErrors(['guide_requested' => $label]);
+            }
+        }
+
         // Hitung total harga per-peserta (dewasa vs pelajar/anak)
         $totalPrice = 0;
         if ($reg) {
@@ -129,7 +142,6 @@ class BookingController extends Controller
             }
 
             // Tambah biaya guide jika diminta (guide_price_per_day × jumlah hari)
-            $guideRequested = $request->boolean('guide_requested');
             if ($guideRequested && $reg->guide_price_per_day) {
                 $totalPrice += (float) $reg->guide_price_per_day * $days;
             }
@@ -223,7 +235,7 @@ class BookingController extends Controller
     {
         $trails = Trail::active()
             ->where('mountain_id', $mountainId)
-            ->select('id', 'name', 'description')
+            ->select('id', 'name', 'description', 'grade')
             ->orderBy('route_order')
             ->get();
 

@@ -22,8 +22,8 @@ class MountainController extends Controller
             $query->search($request->search);
         }
 
-        if ($request->filled('difficulty')) {
-            $query->byDifficulty($request->difficulty);
+        if ($request->filled('grade')) {
+            $query->byGrade($request->grade);
         }
 
         $mountains = $query->paginate($request->get('per_page', 10));
@@ -65,7 +65,7 @@ class MountainController extends Controller
             'location'                    => 'required|string|max:255',
             'province'                    => 'nullable|string|max:100',
             'height_mdpl'                 => 'required|integer|min:0',
-            'difficulty'                  => 'required|in:Easy,Moderate,Hard',
+            'grade'                       => 'required|in:I,II,III,IV,V',
             'description'                 => 'nullable|string',
             'image_url'                   => 'nullable|url',
             // Regulasi (wajib saat buat gunung)
@@ -83,7 +83,7 @@ class MountainController extends Controller
                 'location'    => $validated['location'],
                 'province'    => $validated['province'] ?? null,
                 'height_mdpl' => $validated['height_mdpl'],
-                'difficulty'  => $validated['difficulty'],
+                'grade'       => $validated['grade'],
                 'description' => $validated['description'] ?? null,
                 'image_url'   => $validated['image_url'] ?? null,
             ]);
@@ -118,7 +118,7 @@ class MountainController extends Controller
             'location'    => 'sometimes|string|max:255',
             'province'    => 'nullable|string|max:100',
             'height_mdpl' => 'sometimes|integer|min:0',
-            'difficulty'  => 'sometimes|in:Easy,Moderate,Hard',
+            'grade'       => 'sometimes|in:I,II,III,IV,V',
             'description' => 'nullable|string',
             'image_url'   => 'nullable|url',
             'is_active'   => 'sometimes|boolean',

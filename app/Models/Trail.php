@@ -12,6 +12,10 @@ class Trail extends Model
     protected $fillable = [
         'mountain_id',
         'name',
+        'grade',
+        'length_km',
+        'elevation_gain_m',
+        'surface_type',
         'description',
         'route_order',
         'is_active',
