@@ -93,9 +93,47 @@ class BookingController extends Controller
             }
         }
 
-        // Calculate price
-        $basePrice  = $reg ? (float) $reg->base_price : 0;
-        $totalPrice = $basePrice * $paxCount;
+        // Determine visitor type & day
+        $isForeign = ! $user->nik && $user->passport_number;
+        $startDate = \Carbon\Carbon::parse($validated['start_date']);
+        $isWeekend = $startDate->isWeekend();
+
+        // Parse umur setiap peserta dari NIK
+        $participantAges = collect($validated['participants'])->map(function ($pax) {
+            $age = \App\Models\MountainRegulation::ageFromNik($pax['nik'] ?? '');
+            return ['name' => $pax['name'], 'nik' => $pax['nik'], 'age' => $age];
+        });
+
+        $minorCount  = $participantAges->filter(fn($p) => $p['age'] !== null && $p['age'] < 17)->count();
+        $adultCount  = $participantAges->filter(fn($p) => $p['age'] === null || $p['age'] >= 17)->count();
+
+        // Leader (peserta[0]) tidak boleh di bawah 17 tahun
+        $leaderAge = $participantAges->first()['age'];
+        if ($leaderAge !== null && $leaderAge < 17) {
+            return back()->withInput()
+                ->withErrors(['participants' => 'Pemesan/ketua kelompok harus berumur minimal 17 tahun.']);
+        }
+
+        // Peserta di bawah 17 tahun wajib didampingi pendaki dewasa
+        if ($reg && $reg->minor_must_be_accompanied && $minorCount > 0 && $adultCount < 1) {
+            return back()->withInput()
+                ->withErrors(['participants' => 'Peserta di bawah 17 tahun wajib didampingi minimal 1 pendaki dewasa (≥ 17 tahun) dalam booking yang sama.']);
+        }
+
+        // Hitung total harga per-peserta (dewasa vs pelajar/anak)
+        $totalPrice = 0;
+        if ($reg) {
+            foreach ($participantAges as $pax) {
+                $isStudent = ($pax['age'] !== null && $pax['age'] < 17);
+                $totalPrice += $reg->priceFor((bool) $isForeign, $isWeekend, $isStudent);
+            }
+
+            // Tambah biaya guide jika diminta (guide_price_per_day × jumlah hari)
+            $guideRequested = $request->boolean('guide_requested');
+            if ($guideRequested && $reg->guide_price_per_day) {
+                $totalPrice += (float) $reg->guide_price_per_day * $days;
+            }
+        }
 
         DB::transaction(function () use ($validated, $user, $totalPrice, $days) {
             $booking = Booking::create([

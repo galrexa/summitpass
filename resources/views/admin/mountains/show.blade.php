@@ -36,15 +36,96 @@
             <h3 class="font-semibold text-sm mb-3" style="color:var(--color-text);">Regulasi</h3>
             @if($mountain->regulation)
             @php $reg = $mountain->regulation; @endphp
-            <div class="flex flex-col gap-2">
+
+            {{-- Harga --}}
+            <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Harga Tiket / orang</p>
+            <div class="flex flex-col gap-1.5 mb-4" style="background:var(--color-forest-50);border-radius:0.4rem;padding:0.75rem;">
                 <div class="flex justify-between text-sm">
-                    <span style="color:var(--color-text-muted);">Harga dasar</span>
+                    <span style="color:var(--color-text-muted);">Lokal – Weekday</span>
                     <span class="font-semibold">Rp {{ number_format($reg->base_price, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span style="color:var(--color-text-muted);">Kuota/jalur/hari</span>
+                    <span style="color:var(--color-text-muted);">Lokal – Weekend</span>
+                    <span class="font-semibold">
+                        @if($reg->price_weekend)
+                            Rp {{ number_format($reg->price_weekend, 0, ',', '.') }}
+                        @else
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Weekday</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Mancanegara – Weekday</span>
+                    <span class="font-semibold">
+                        @if($reg->price_foreign_weekday)
+                            Rp {{ number_format($reg->price_foreign_weekday, 0, ',', '.') }}
+                        @else
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Lokal</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Mancanegara – Weekend</span>
+                    <span class="font-semibold">
+                        @if($reg->price_foreign_weekend)
+                            Rp {{ number_format($reg->price_foreign_weekend, 0, ',', '.') }}
+                        @elseif($reg->price_foreign_weekday)
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Mancanegara Weekday</span>
+                        @else
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Lokal</span>
+                        @endif
+                    </span>
+                </div>
+            </div>
+
+            {{-- Harga Pelajar --}}
+            <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Pelajar / Anak (&lt; 17 Thn)</p>
+            <div class="flex flex-col gap-1.5 mb-4" style="background:#fefce8;border-radius:0.4rem;padding:0.75rem;border:1px solid #fde68a;">
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Pelajar – Weekday</span>
+                    <span class="font-semibold">
+                        @if($reg->price_student)
+                            Rp {{ number_format($reg->price_student, 0, ',', '.') }}
+                        @else
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Lokal Weekday</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Pelajar – Weekend</span>
+                    <span class="font-semibold">
+                        @if($reg->price_student_weekend)
+                            Rp {{ number_format($reg->price_student_weekend, 0, ',', '.') }}
+                        @elseif($reg->price_student)
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Pelajar Weekday</span>
+                        @else
+                            <span style="color:var(--color-text-muted);font-weight:400;">= Lokal Weekend</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm pt-1" style="border-top:1px solid #fde68a;">
+                    <span style="color:var(--color-text-muted);">Wajib pendamping dewasa</span>
+                    <span class="font-semibold">{{ $reg->minor_must_be_accompanied ? 'Ya' : 'Tidak' }}</span>
+                </div>
+            </div>
+
+            {{-- Kuota --}}
+            <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Kuota Pendaki</p>
+            <div class="flex flex-col gap-1.5 mb-4" style="background:var(--color-forest-50);border-radius:0.4rem;padding:0.75rem;">
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Total/hari (semua jalur)</span>
+                    <span class="font-semibold">
+                        {{ $reg->quota_total_per_day ? $reg->quota_total_per_day.' orang' : '—' }}
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Default per jalur/hari</span>
                     <span class="font-semibold">{{ $reg->quota_per_trail_per_day }} orang</span>
                 </div>
+            </div>
+
+            {{-- Aturan lain --}}
+            <div class="flex flex-col gap-1.5">
                 <div class="flex justify-between text-sm">
                     <span style="color:var(--color-text-muted);">Maks. hari pendakian</span>
                     <span class="font-semibold">{{ $reg->max_hiking_days }} hari</span>
@@ -60,6 +141,12 @@
                 <div class="flex justify-between text-sm">
                     <span style="color:var(--color-text-muted);">Guide wajib</span>
                     <span class="font-semibold">{{ $reg->guide_required ? 'Ya' : 'Tidak' }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span style="color:var(--color-text-muted);">Biaya guide/hari</span>
+                    <span class="font-semibold">
+                        {{ $reg->guide_price_per_day ? 'Rp '.number_format($reg->guide_price_per_day, 0, ',', '.') : '—' }}
+                    </span>
                 </div>
             </div>
             @else
@@ -100,14 +187,19 @@
         <h4 class="font-semibold text-sm mb-3" style="color:var(--color-text);">Tambah Jalur Baru</h4>
         <form method="POST" action="{{ route('admin.mountains.trails.store', $mountain->id) }}">
             @csrf
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="sm:col-span-1">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
                     <label class="form-label">Nama Jalur <span style="color:#dc2626;">*</span></label>
                     <input type="text" name="name" class="form-input" placeholder="cth. Ranu Pane" required>
                 </div>
                 <div>
                     <label class="form-label">Urutan Rute <span style="color:#dc2626;">*</span></label>
                     <input type="number" name="route_order" class="form-input" value="{{ $mountain->trails->count() + 1 }}" min="1" required>
+                </div>
+                <div>
+                    <label class="form-label">Kuota/Hari</label>
+                    <input type="number" name="quota_per_day" class="form-input" min="1" placeholder="Default regulasi">
+                    <p class="text-xs mt-0.5" style="color:var(--color-text-muted);">Kosongkan = pakai default</p>
                 </div>
                 <div>
                     <label class="form-label">Deskripsi</label>
@@ -133,6 +225,11 @@
                 <span class="badge badge-gray" style="font-size:0.65rem;">Nonaktif</span>
                 @endif
                 <span class="text-xs" style="color:var(--color-text-muted);">{{ $trail->checkpoints->count() }} pos</span>
+                @if($trail->quota_per_day)
+                <span class="text-xs px-1.5 py-0.5 rounded" style="background:#dbeafe;color:#1d4ed8;">{{ $trail->quota_per_day }} orang/hari</span>
+                @else
+                <span class="text-xs" style="color:var(--color-text-muted);">kuota: default</span>
+                @endif
             </div>
             <div class="flex gap-1">
                 <button onclick="document.getElementById('edit-trail-{{ $trail->id }}').classList.toggle('hidden')" class="btn btn-ghost btn-sm btn-icon" title="Edit jalur">
@@ -163,7 +260,7 @@
         <div id="edit-trail-{{ $trail->id }}" class="hidden px-4 py-3" style="background:#f9fafb;border-bottom:1px solid var(--color-border);">
             <form method="POST" action="{{ route('admin.mountains.trails.update', [$mountain->id, $trail->id]) }}">
                 @csrf @method('PUT')
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 items-end">
                     <div>
                         <label class="form-label">Nama</label>
                         <input type="text" name="name" value="{{ $trail->name }}" class="form-input" required>
@@ -171,6 +268,10 @@
                     <div>
                         <label class="form-label">Urutan</label>
                         <input type="number" name="route_order" value="{{ $trail->route_order }}" class="form-input" min="1" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Kuota/Hari</label>
+                        <input type="number" name="quota_per_day" value="{{ $trail->quota_per_day }}" class="form-input" min="1" placeholder="Default regulasi">
                     </div>
                     <div>
                         <label class="form-label">Deskripsi</label>

@@ -75,10 +75,18 @@ class MountainWebController extends Controller
             'image_url'                       => 'nullable|url',
             'pengelola_id'                    => 'nullable|exists:users,id',
             'base_price'                      => 'required|numeric|min:0',
+            'price_weekend'                   => 'nullable|numeric|min:0',
+            'price_foreign_weekday'           => 'nullable|numeric|min:0',
+            'price_foreign_weekend'           => 'nullable|numeric|min:0',
+            'price_student'                   => 'nullable|numeric|min:0',
+            'price_student_weekend'           => 'nullable|numeric|min:0',
+            'minor_must_be_accompanied'       => 'nullable|boolean',
             'quota_per_trail_per_day'         => 'required|integer|min:1',
+            'quota_total_per_day'             => 'nullable|integer|min:1',
             'max_hiking_days'                 => 'required|integer|min:1',
             'max_participants_per_account'    => 'required|integer|min:1',
             'guide_required'                  => 'nullable|boolean',
+            'guide_price_per_day'             => 'nullable|numeric|min:0',
             'checkout_deadline_hour'          => 'required|integer|between:0,23',
             'min_elevation_experience'        => 'nullable|integer|min:0',
         ]);
@@ -99,10 +107,18 @@ class MountainWebController extends Controller
             MountainRegulation::create([
                 'mountain_id'                  => $mountain->id,
                 'base_price'                   => $validated['base_price'],
+                'price_weekend'                => $validated['price_weekend'] ?? null,
+                'price_foreign_weekday'        => $validated['price_foreign_weekday'] ?? null,
+                'price_foreign_weekend'        => $validated['price_foreign_weekend'] ?? null,
+                'price_student'                => $validated['price_student'] ?? null,
+                'price_student_weekend'        => $validated['price_student_weekend'] ?? null,
+                'minor_must_be_accompanied'    => $request->boolean('minor_must_be_accompanied', true),
                 'quota_per_trail_per_day'      => $validated['quota_per_trail_per_day'],
+                'quota_total_per_day'          => $validated['quota_total_per_day'] ?? null,
                 'max_hiking_days'              => $validated['max_hiking_days'],
                 'max_participants_per_account' => $validated['max_participants_per_account'],
                 'guide_required'               => $request->boolean('guide_required'),
+                'guide_price_per_day'          => $validated['guide_price_per_day'] ?? null,
                 'checkout_deadline_hour'       => $validated['checkout_deadline_hour'],
                 'min_elevation_experience'     => $validated['min_elevation_experience'] ?? null,
             ]);
@@ -150,10 +166,18 @@ class MountainWebController extends Controller
             'is_active'                       => 'nullable|boolean',
             'pengelola_id'                    => 'nullable|exists:users,id',
             'base_price'                      => 'required|numeric|min:0',
+            'price_weekend'                   => 'nullable|numeric|min:0',
+            'price_foreign_weekday'           => 'nullable|numeric|min:0',
+            'price_foreign_weekend'           => 'nullable|numeric|min:0',
+            'price_student'                   => 'nullable|numeric|min:0',
+            'price_student_weekend'           => 'nullable|numeric|min:0',
+            'minor_must_be_accompanied'       => 'nullable|boolean',
             'quota_per_trail_per_day'         => 'required|integer|min:1',
+            'quota_total_per_day'             => 'nullable|integer|min:1',
             'max_hiking_days'                 => 'required|integer|min:1',
             'max_participants_per_account'    => 'required|integer|min:1',
             'guide_required'                  => 'nullable|boolean',
+            'guide_price_per_day'             => 'nullable|numeric|min:0',
             'checkout_deadline_hour'          => 'required|integer|between:0,23',
             'min_elevation_experience'        => 'nullable|integer|min:0',
         ]);
@@ -181,10 +205,18 @@ class MountainWebController extends Controller
                 ['mountain_id' => $mountain->id],
                 [
                     'base_price'                   => $validated['base_price'],
+                    'price_weekend'                => $validated['price_weekend'] ?? null,
+                    'price_foreign_weekday'        => $validated['price_foreign_weekday'] ?? null,
+                    'price_foreign_weekend'        => $validated['price_foreign_weekend'] ?? null,
+                    'price_student'                => $validated['price_student'] ?? null,
+                    'price_student_weekend'        => $validated['price_student_weekend'] ?? null,
+                    'minor_must_be_accompanied'    => $request->boolean('minor_must_be_accompanied', true),
                     'quota_per_trail_per_day'      => $validated['quota_per_trail_per_day'],
+                    'quota_total_per_day'          => $validated['quota_total_per_day'] ?? null,
                     'max_hiking_days'              => $validated['max_hiking_days'],
                     'max_participants_per_account' => $validated['max_participants_per_account'],
                     'guide_required'               => $request->boolean('guide_required'),
+                    'guide_price_per_day'          => $validated['guide_price_per_day'] ?? null,
                     'checkout_deadline_hour'       => $validated['checkout_deadline_hour'],
                     'min_elevation_experience'     => $validated['min_elevation_experience'] ?? null,
                 ]
@@ -217,9 +249,10 @@ class MountainWebController extends Controller
         $this->authorizeForMountain($mountain);
 
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'route_order' => 'required|integer|min:1',
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'route_order'   => 'required|integer|min:1',
+            'quota_per_day' => 'nullable|integer|min:1',
         ]);
 
         $trail = $mountain->trails()->create(array_merge($validated, ['is_active' => true]));
@@ -236,17 +269,19 @@ class MountainWebController extends Controller
         $trail = Trail::where('mountain_id', $mountainId)->findOrFail($trailId);
 
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'route_order' => 'required|integer|min:1',
-            'is_active'   => 'nullable|boolean',
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'route_order'   => 'required|integer|min:1',
+            'is_active'     => 'nullable|boolean',
+            'quota_per_day' => 'nullable|integer|min:1',
         ]);
 
         $trail->update([
-            'name'        => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'route_order' => $validated['route_order'],
-            'is_active'   => $request->boolean('is_active'),
+            'name'          => $validated['name'],
+            'description'   => $validated['description'] ?? null,
+            'route_order'   => $validated['route_order'],
+            'is_active'     => $request->boolean('is_active'),
+            'quota_per_day' => $validated['quota_per_day'] ?? null,
         ]);
 
         return redirect()->route('admin.mountains.show', $mountainId)

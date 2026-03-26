@@ -89,20 +89,80 @@
             <div class="card mb-5">
                 <h3 class="font-semibold text-sm mb-4" style="color:var(--color-text);">Regulasi Pendakian</h3>
                 @php $reg = $mountain->regulation; @endphp
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
+                {{-- Harga --}}
+                <p class="text-xs font-semibold mb-2 mt-1" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Harga Tiket per Orang (Rp)</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5" style="padding:1rem;background:var(--color-forest-50);border-radius:0.5rem;border:1px solid var(--color-border);">
                     <div>
-                        <label class="form-label">Harga Dasar per Orang (Rp) <span style="color:#dc2626;">*</span></label>
-                        <input type="number" name="base_price" value="{{ old('base_price', $reg?->base_price ?? 0) }}" class="form-input" min="0">
+                        <label class="form-label">Lokal — Weekday (Senin–Jumat) <span style="color:#dc2626;">*</span></label>
+                        <input type="number" name="base_price" value="{{ old('base_price', $reg?->base_price ?? 0) }}" class="form-input @error('base_price') border-red-400 @enderror" min="0">
                         @error('base_price')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
-
                     <div>
-                        <label class="form-label">Kuota per Jalur per Hari <span style="color:#dc2626;">*</span></label>
+                        <label class="form-label">Lokal — Weekend (Sabtu/Minggu)</label>
+                        <input type="number" name="price_weekend" value="{{ old('price_weekend', $reg?->price_weekend) }}" class="form-input" min="0" placeholder="Kosongkan = sama dengan weekday">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Jika kosong, menggunakan harga weekday lokal.</p>
+                        @error('price_weekend')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Mancanegara — Weekday</label>
+                        <input type="number" name="price_foreign_weekday" value="{{ old('price_foreign_weekday', $reg?->price_foreign_weekday) }}" class="form-input" min="0" placeholder="Kosongkan = sama dengan lokal">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Jika kosong, menggunakan harga weekday lokal.</p>
+                        @error('price_foreign_weekday')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Mancanegara — Weekend</label>
+                        <input type="number" name="price_foreign_weekend" value="{{ old('price_foreign_weekend', $reg?->price_foreign_weekend) }}" class="form-input" min="0" placeholder="Kosongkan = sama dengan mancanegara weekday">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Jika kosong, menggunakan harga weekday mancanegara.</p>
+                        @error('price_foreign_weekend')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                {{-- Harga Pelajar --}}
+                <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Harga Pelajar / Anak (&lt; 17 Tahun)</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5" style="padding:1rem;background:#fefce8;border-radius:0.5rem;border:1px solid #fde68a;">
+                    <div>
+                        <label class="form-label">Harga Pelajar — Weekday</label>
+                        <input type="number" name="price_student" value="{{ old('price_student', $reg?->price_student) }}" class="form-input" min="0" placeholder="Kosongkan = sama dengan lokal weekday">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Untuk peserta WNI berumur di bawah 17 tahun. Jika kosong, menggunakan harga lokal weekday.</p>
+                        @error('price_student')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Harga Pelajar — Weekend</label>
+                        <input type="number" name="price_student_weekend" value="{{ old('price_student_weekend', $reg?->price_student_weekend) }}" class="form-input" min="0" placeholder="Kosongkan = sama dengan pelajar weekday">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Jika kosong, menggunakan harga pelajar weekday.</p>
+                        @error('price_student_weekend')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="minor_must_be_accompanied" value="1"
+                                   {{ old('minor_must_be_accompanied', $reg?->minor_must_be_accompanied ?? true) ? 'checked' : '' }}
+                                   style="width:16px;height:16px;accent-color:var(--color-forest-600);">
+                            <span class="text-sm font-medium" style="color:var(--color-text);">Peserta &lt; 17 tahun wajib didampingi minimal 1 pendaki dewasa dalam satu booking</span>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Kuota --}}
+                <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Kuota Pendaki</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5" style="padding:1rem;background:var(--color-forest-50);border-radius:0.5rem;border:1px solid var(--color-border);">
+                    <div>
+                        <label class="form-label">Kuota Total per Hari (semua jalur)</label>
+                        <input type="number" name="quota_total_per_day" value="{{ old('quota_total_per_day', $reg?->quota_total_per_day) }}" class="form-input" min="1" placeholder="Kosongkan = tidak ada batas total">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Batas maksimum pendaki per hari dari seluruh jalur gabungan.</p>
+                        @error('quota_total_per_day')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Kuota Default per Jalur per Hari <span style="color:#dc2626;">*</span></label>
                         <input type="number" name="quota_per_trail_per_day" value="{{ old('quota_per_trail_per_day', $reg?->quota_per_trail_per_day ?? 50) }}" class="form-input" min="1">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Berlaku untuk jalur yang tidak punya kuota khusus.</p>
                         @error('quota_per_trail_per_day')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
+                </div>
 
+                {{-- Aturan lain --}}
+                <p class="text-xs font-semibold mb-2" style="color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;">Aturan Pendakian</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="form-label">Maks. Hari Pendakian <span style="color:#dc2626;">*</span></label>
                         <input type="number" name="max_hiking_days" value="{{ old('max_hiking_days', $reg?->max_hiking_days ?? 3) }}" class="form-input" min="1">
@@ -116,6 +176,13 @@
                     <div>
                         <label class="form-label">Batas Jam Checkout <span style="color:#dc2626;">*</span></label>
                         <input type="number" name="checkout_deadline_hour" value="{{ old('checkout_deadline_hour', $reg?->checkout_deadline_hour ?? 14) }}" class="form-input" min="0" max="23">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Biaya Guide per Hari (Rp)</label>
+                        <input type="number" name="guide_price_per_day" value="{{ old('guide_price_per_day', $reg?->guide_price_per_day) }}" class="form-input" min="0" placeholder="Kosongkan = gratis / tidak ada guide">
+                        <p class="text-xs mt-1" style="color:var(--color-text-muted);">Flat rate per hari (bukan per orang). Ditambahkan ke total harga jika pendaki memilih pakai guide.</p>
+                        @error('guide_price_per_day')<p class="text-xs mt-1" style="color:#dc2626;">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="flex items-center gap-3 pt-5">

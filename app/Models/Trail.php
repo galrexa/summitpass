@@ -15,6 +15,7 @@ class Trail extends Model
         'description',
         'route_order',
         'is_active',
+        'quota_per_day',
     ];
 
     protected $casts = [
