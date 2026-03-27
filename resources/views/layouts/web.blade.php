@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'SummitPass') }} — SummitPass</title>
+
+    {{-- Open Graph Meta Tags --}}
+    <meta property="og:title" content="{{ $ogTitle ?? ($title ?? config('app.name', 'SummitPass')) }} — SummitPass">
+    <meta property="og:description" content="{{ $ogDescription ?? 'Platform tiket pendakian gunung digital. Booking tiket, cek kuota, dan kelola pendakianmu dengan mudah.' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('images/og-image.webp') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="SummitPass">
+    <meta property="og:locale" content="id_ID">
+
+    {{-- WhatsApp / Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle ?? ($title ?? config('app.name', 'SummitPass')) }} — SummitPass">
+    <meta name="twitter:description" content="{{ $ogDescription ?? 'Platform tiket pendakian gunung digital. Booking tiket, cek kuota, dan kelola pendakianmu dengan mudah.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('images/og-image.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
