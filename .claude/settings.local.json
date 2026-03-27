@@ -15,7 +15,8 @@
       "Bash(SRC=\"C:/Users/Bappisus/Downloads/update code/code\")",
       "Bash(__NEW_LINE_4ea0487f40322d89__ cp:*)",
       "Bash(cp \"$SRC/2026_03_27_000002_add_shared_group_to_trail_checkpoints_table.php\" \"$PROJECT/database/migrations/\")",
-      "Bash(cp \"$SRC/Booking.php\" \"$PROJECT/app/Models/Booking.php\")"
+      "Bash(cp \"$SRC/Booking.php\" \"$PROJECT/app/Models/Booking.php\")",
+      "Bash(find 'c:\\\\Users\\\\Bappisus\\\\Documents\\\\PIDI x Hackathon\\\\Source Code\\\\summitpass/public' -type f -name *.svg -o -name *.png -o -name *.jpg -o -name *.jpeg -o -name favicon*)"
     ]
   }
 }

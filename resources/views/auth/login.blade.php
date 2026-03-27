@@ -19,7 +19,9 @@
             body { grid-template-columns: 1fr 1fr; }
         }
         .auth-illustration {
-            background: linear-gradient(160deg, var(--color-forest-900) 0%, var(--color-lake-800) 60%, var(--color-forest-800) 100%);
+            background:
+                linear-gradient(160deg, rgba(5,46,22,0.72) 0%, rgba(12,74,110,0.55) 60%, rgba(20,83,45,0.65) 100%),
+                url("https://bromotenggersemeru.id/asset/template/assets/img/1920x800/img1.jpg") center/cover no-repeat;
             display: none;
             flex-direction: column;
             justify-content: space-between;
@@ -32,7 +34,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            backdrop-filter: blur(1px);
         }
         .mountain-silhouette {
             position: absolute;
@@ -50,9 +53,7 @@
         {{-- Logo --}}
         <a href="/" style="display:inline-flex;align-items:center;gap:0.625rem;text-decoration:none;color:white;">
             <div style="width:36px;height:36px;background:var(--color-forest-600);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
-                </svg>
+                <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:100%;height:100%;object-fit:contain;">
             </div>
             <span style="font-weight:700;font-size:1.1rem;">SummitPass</span>
         </a>
@@ -90,15 +91,10 @@
                 <div class="avatar" style="width:32px;height:32px;font-size:0.7rem;background:var(--color-forest-600);color:white;">RH</div>
                 <div>
                     <div style="font-size:0.8rem;font-weight:600;color:#fff;">Rudi Hartono</div>
-                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);">Pengelola TN Semeru</div>
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);">Pengelola Taman Nasional</div>
                 </div>
             </div>
         </div>
-
-        {{-- Mountain silhouette SVG --}}
-        <svg class="mountain-silhouette" viewBox="0 0 1200 300" fill="white" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <path d="M0 300 L0 200 L150 120 L250 180 L400 60 L550 160 L650 40 L800 140 L900 80 L1050 160 L1200 100 L1200 300 Z"/>
-        </svg>
     </div>
 
     {{-- Right: Login form --}}
@@ -108,9 +104,7 @@
             {{-- Mobile logo --}}
             <a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;color:var(--color-text);margin-bottom:2.5rem;" class="lg:hidden">
                 <div style="width:30px;height:30px;background:var(--color-forest-700);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
-                    </svg>
+                    <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:100%;height:100%;object-fit:contain;">
                 </div>
                 <span style="font-weight:700;font-size:1rem;">SummitPass</span>
             </a>
@@ -242,6 +236,7 @@
 
             </form>
 
+            @if(env('GOOGLE_AUTH_ENABLED', true))
             {{-- Divider --}}
             <div style="display:flex;align-items:center;gap:1rem;margin:1.75rem 0 1.25rem;">
                 <div style="flex:1;height:1px;background:var(--color-border);"></div>
@@ -264,6 +259,7 @@
                 </svg>
                 Masuk dengan Google
             </a>
+            @endif
 
             {{-- Register link --}}
             <p style="text-align:center;font-size:0.875rem;color:var(--color-text-muted);">
@@ -275,21 +271,25 @@
                 @endif
             </p>
 
-            {{-- Role info --}}
-            <div style="margin-top:2rem;padding:1rem;background:var(--color-forest-50);border-radius:10px;border:1px solid var(--color-forest-200);">
-                <div style="font-size:0.72rem;font-weight:600;color:var(--color-forest-700);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Akses berdasarkan role</div>
-                <div style="display:flex;flex-direction:column;gap:0.35rem;">
-                    @foreach([
-                        ['Pendaki', 'Booking SIMAKSI & QR Pass'],
-                        ['Pengelola TN', 'Dashboard monitoring kawasan'],
-                        ['Admin', 'Kelola seluruh sistem'],
-                    ] as [$role, $desc])
-                    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-forest-600)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
-                        <span style="font-weight:600;color:var(--color-text);">{{ $role }}</span>
-                        <span style="color:var(--color-text-muted);">&mdash; {{ $desc }}</span>
+            {{-- Demo credentials --}}
+            <div style="margin-top:2rem;background:var(--color-forest-50);border:1px solid var(--color-forest-200);border-radius:12px;padding:1.125rem 1.25rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.875rem;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-forest-600)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span style="font-size:0.7rem;font-weight:700;color:var(--color-forest-700);text-transform:uppercase;letter-spacing:0.05em;">Akun Demo Prototipe</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                    {{-- Pendaki --}}
+                    <div style="background:#fff;border:1px solid var(--color-border);border-radius:8px;padding:0.75rem 0.875rem;">
+                        <div style="font-size:0.68rem;font-weight:700;color:var(--color-forest-600);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Pendaki</div>
+                        <div style="font-size:0.775rem;color:var(--color-text-muted);">Email: <span style="font-weight:600;color:var(--color-text);font-family:monospace;">budi@example.com</span></div>
+                        <div style="font-size:0.775rem;color:var(--color-text-muted);">Password: <span style="font-weight:600;color:var(--color-text);font-family:monospace;">pendaki123</span></div>
                     </div>
-                    @endforeach
+                    {{-- Pengelola --}}
+                    <div style="background:#fff;border:1px solid var(--color-border);border-radius:8px;padding:0.75rem 0.875rem;">
+                        <div style="font-size:0.68rem;font-weight:700;color:var(--color-forest-600);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Pengelola Taman Nasional</div>
+                        <div style="font-size:0.775rem;color:var(--color-text-muted);">Email: <span style="font-weight:600;color:var(--color-text);font-family:monospace;">pengelola@mail.com</span></div>
+                        <div style="font-size:0.775rem;color:var(--color-text-muted);">Password: <span style="font-weight:600;color:var(--color-text);font-family:monospace;">pengelola123</span></div>
+                    </div>
                 </div>
             </div>
 

@@ -44,9 +44,7 @@
         @else
         <div class="flex items-center gap-2 flex-shrink-0">
             <div class="sidebar-logo-icon" style="width:30px;height:30px;border-radius:8px;background:var(--color-forest-700);">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
-                </svg>
+                <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:100%;height:100%;object-fit:contain;">
             </div>
         </div>
         @endif
