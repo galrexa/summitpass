@@ -37,7 +37,7 @@
     >
         {{-- Logo --}}
         @php $role = auth()->user()?->role ?? 'guest'; @endphp
-        <a href="{{ in_array($role, ['admin', 'pengelola_tn']) ? route('admin.dashboard') : route('dashboard') }}" class="sidebar-logo">
+        <a href="{{ in_array($role, ['admin', 'pengelola_tn']) ? route('admin.dashboard') : route('pendaki.jejak-summit') }}" class="sidebar-logo">
             <div class="sidebar-logo-icon">
                 <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:100%;height:100%;object-fit:contain;">
             </div>
