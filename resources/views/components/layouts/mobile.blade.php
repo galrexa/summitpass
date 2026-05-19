@@ -94,31 +94,33 @@
     {{-- Bottom navigation --}}
     @unless($hideNav ?? false)
     <nav class="mobile-bottom-nav">
-        <a href="{{ route('home') }}"
-           class="mobile-nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('home') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9,22 9,12 15,12 15,22"/>
+        {{-- Tab 1: Jelajahi --}}
+        <a href="{{ route('pendaki.explore') }}"
+           class="mobile-nav-item {{ request()->routeIs('pendaki.explore') ? 'active' : '' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.explore') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
             </svg>
-            <span>Beranda</span>
+            <span>Jelajahi</span>
         </a>
 
-        <a href="#"
-           class="mobile-nav-item {{ request()->routeIs('booking.*') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('booking.*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+        {{-- Tab 2: Booking --}}
+        <a href="{{ route('pendaki.bookings') }}"
+           class="mobile-nav-item {{ request()->routeIs('pendaki.bookings*') ? 'active' : '' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.bookings*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
             <span>Booking</span>
         </a>
 
-        <a href="#"
-           class="mobile-nav-item {{ request()->routeIs('qr-pass.*') ? 'active' : '' }}"
+        {{-- Tab 3: QR Pass (center FAB) --}}
+        <a href="{{ route('pendaki.my-pass') }}"
+           class="mobile-nav-item {{ request()->routeIs('pendaki.my-pass') ? 'active' : '' }}"
            style="position:relative;">
-            {{-- QR Pass center button --}}
             <div style="
                 width:52px; height:52px;
-                background: linear-gradient(135deg, var(--color-forest-700), var(--color-lake-600));
+                background: {{ request()->routeIs('pendaki.my-pass') ? 'linear-gradient(135deg,#14532d,#164e63)' : 'linear-gradient(135deg, var(--color-forest-700), var(--color-lake-600))' }};
                 border-radius: 16px;
                 display: flex; align-items: center; justify-content: center;
                 box-shadow: 0 4px 16px rgba(45,106,79,0.35);
@@ -128,24 +130,26 @@
                     <rect x="3" y="3" width="7" height="7" rx="1"/>
                     <rect x="14" y="3" width="7" height="7" rx="1"/>
                     <rect x="3" y="14" width="7" height="7" rx="1"/>
-                    <path d="M14 14h1v1h-1z M14 17h1 M17 14h1 M17 17h1v1h-1 M20 14h1v4h-1 M14 20h4v1h-4"/>
+                    <rect x="14" y="14" width="3" height="3" rx=".5"/>
                 </svg>
             </div>
             <span>QR Pass</span>
         </a>
 
-        <a href="#"
-           class="mobile-nav-item {{ request()->routeIs('trekking.*') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('trekking.*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12,6 12,12 16,14"/>
+        {{-- Tab 4: Jejak --}}
+        <a href="{{ route('pendaki.jejak-summit') }}"
+           class="mobile-nav-item {{ request()->routeIs('pendaki.jejak-summit') ? 'active' : '' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.jejak-summit') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
             </svg>
-            <span>Log</span>
+            <span>Jejak</span>
         </a>
 
-        <a href="#"
-           class="mobile-nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('profile.*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+        {{-- Tab 5: Profil --}}
+        <a href="{{ route('pendaki.profile') }}"
+           class="mobile-nav-item {{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? 'active' : '' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
             </svg>

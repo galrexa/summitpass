@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>Jejak Summit</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Jejak Summit']</x-slot:breadcrumb>
 
     <div style="max-width:640px;">
 
@@ -86,4 +85,4 @@
 
     </div>
 
-</x-layouts.web>
+</x-layouts.mobile>

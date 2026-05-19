@@ -16,13 +16,19 @@ class Mountain extends Model
         'height_mdpl',
         'grade',
         'description',
+        'ecosystem_type',
         'image_url',
         'is_active',
+        'trail_status',
         'pengelola_id',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'latitude'  => 'float',
+        'longitude' => 'float',
     ];
 
     public function regulation()
@@ -59,6 +65,15 @@ class Mountain extends Model
     {
         return $query->where('name', 'like', "%{$search}%")
                      ->orWhere('location', 'like', "%{$search}%");
+    }
+
+    public function scopeWithQuotaSummary($query)
+    {
+        return $query->withCount([
+            'bookings as booked_this_week' => fn($q) => $q
+                ->whereBetween('start_date', [now()->startOfWeek(), now()->endOfWeek()])
+                ->whereIn('status', ['paid', 'active']),
+        ]);
     }
 
     public function getFormattedHeightAttribute()

@@ -16,6 +16,7 @@ class QrPass extends Model
         'valid_from',
         'valid_until',
         'status',
+        'family_token',
     ];
 
     protected $casts = [

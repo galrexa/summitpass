@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>Trekking Log</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Trekking Log']</x-slot:breadcrumb>
 
     <div style="max-width:640px;">
 
@@ -165,4 +164,4 @@
     }
     </script>
 
-</x-layouts.web>
+</x-layouts.mobile>

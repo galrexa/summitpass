@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>Profil Saya</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Profil Saya']</x-slot:breadcrumb>
 
     <div style="max-width:640px;">
 
@@ -58,4 +57,4 @@
 
     </div>
 
-</x-layouts.web>
+</x-layouts.mobile>

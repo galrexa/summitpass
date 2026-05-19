@@ -120,6 +120,16 @@
                 </svg>
                 <span class="sidebar-link-label">QR Pass Saya</span>
             </a>
+
+            <a href="{{ route('pendaki.family-link') }}"
+               class="sidebar-link {{ request()->routeIs('pendaki.family-link') ? 'active' : '' }}"
+               data-tooltip="Family Link">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                <span class="sidebar-link-label">Family Link</span>
+            </a>
             @endif
 
             {{-- Manajemen (admin/pengelola only) --}}
@@ -180,6 +190,18 @@
                 </svg>
                 <span class="sidebar-link-label">Trekking Map</span>
             </a>
+
+            <a href="{{ route('admin.monitoring.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.monitoring.*') ? 'active' : '' }}"
+               data-tooltip="Monitoring">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                <span class="sidebar-link-label">Monitoring Real-time</span>
+                @if(($activeAnomalies ?? 0) > 0)
+                <span class="sidebar-badge" style="background:#ef4444;">{{ $activeAnomalies }}</span>
+                @endif
+            </a>
             @endif
 
             {{-- Simulasi Scan — admin & pengelola_tn --}}
@@ -208,6 +230,29 @@
                 <span class="sidebar-link-label">Pengaturan</span>
             </a>
             @endif
+
+            {{-- Segera Hadir — semua role --}}
+            <div class="sidebar-section-label mt-4">Segera Hadir</div>
+
+            <div class="sidebar-link disabled" style="opacity:0.5;cursor:not-allowed;" data-tooltip="Operator & Komunitas">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="sidebar-link-label">Operator / Komunitas</span>
+                <span class="sidebar-badge" style="background:var(--color-text-muted);font-size:0.6rem;">Fase 2</span>
+            </div>
+
+            <div class="sidebar-link disabled" style="opacity:0.5;cursor:not-allowed;" data-tooltip="UMKM Lokal">
+                <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                <span class="sidebar-link-label">UMKM Lokal</span>
+                <span class="sidebar-badge" style="background:var(--color-text-muted);font-size:0.6rem;">Fase 3</span>
+            </div>
 
         </nav>
 

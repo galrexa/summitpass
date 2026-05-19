@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FamilyTrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pendaki\PendakiController;
 use App\Http\Controllers\Pendaki\BookingController as PendakiBookingController;
@@ -16,7 +17,13 @@ use App\Http\Controllers\Admin\TrekkingMapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $spotlightMountains = \App\Models\Mountain::active()
+        ->withQuotaSummary()
+        ->with('regulation')
+        ->orderByDesc('height_mdpl')
+        ->limit(3)
+        ->get();
+    return view('welcome', compact('spotlightMountains'));
 });
 
 Route::middleware('guest')->group(function () {
@@ -30,6 +37,8 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'webLogout'])->name('logout')->middleware('auth');
 
+Route::get('/track/{token}', [FamilyTrackingController::class, 'show'])->name('public.family-tracking');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('dashboard.index'))->name('dashboard');
     Route::get('/home', fn () => view('dashboard.index'))->name('home');
@@ -37,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/setup', [ProfileController::class, 'saveSetup'])->name('profile.setup.save');
 
     Route::prefix('my')->name('pendaki.')->middleware('role:pendaki')->group(function () {
+        Route::get('/explore',            [PendakiController::class, 'explore'])->name('explore');
         Route::get('/bookings',           [PendakiBookingController::class, 'index'])->name('bookings');
         Route::get('/bookings/create',    [PendakiBookingController::class, 'create'])->name('bookings.create');
         Route::post('/bookings',          [PendakiBookingController::class, 'store'])->name('bookings.store');
@@ -45,12 +55,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/jejak-summit',       [PendakiController::class, 'jejakSummit'])->name('jejak-summit');
         Route::get('/trekking-log',       [PendakiController::class, 'trekkingLog'])->name('trekking-log');
         Route::get('/pass',               [PendakiController::class, 'myPass'])->name('my-pass');
+        Route::get('/family-link',        [PendakiController::class, 'familyLink'])->name('family-link');
         Route::get('/profile',            [PendakiController::class, 'profile'])->name('profile');
         Route::get('/settings',           [PendakiController::class, 'settings'])->name('settings');
     });
 
-    Route::get('/api/mountains/{mountainId}/trails', [PendakiBookingController::class, 'trails'])
-        ->name('api.mountains.trails');
+    Route::get('/api/mountains/{mountainId}/trails',  [PendakiBookingController::class, 'trails'])->name('api.mountains.trails');
+    Route::get('/api/mountains/{id}/detail',          [PendakiController::class, 'mountainDetail'])->name('api.mountain.detail');
+    Route::get('/api/mountains/{id}/weather',         [PendakiController::class, 'mountainWeather'])->name('api.mountain.weather');
 });
 
 // Admin & Pengelola

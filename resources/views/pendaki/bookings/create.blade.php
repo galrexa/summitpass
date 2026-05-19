@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile showBack backUrl="{{ route('pendaki.bookings') }}">
     <x-slot:title>Booking Baru</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Booking Saya', 'Booking Baru']</x-slot:breadcrumb>
 
     <x-slot:head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -27,6 +26,7 @@
         x-data="bookingForm()"
         x-init="init()"
         style="max-width:760px;"
+        x-effect="/* ratio watchers */"
     >
 
         {{-- Step indicator --}}
@@ -423,13 +423,82 @@
                                            placeholder="16 digit NIK" required>
                                 </div>
                             </div>
+
+                            {{-- Peran dalam pendakian --}}
+                            <div class="form-group mt-3">
+                                <label class="form-label" style="font-size:.72rem;">Peran dalam Pendakian</label>
+                                <select :name="'participants['+idx+'][role]'" x-model="pax.role" class="form-input" style="appearance:auto;">
+                                    <option value="hiker">🟢 Pendaki</option>
+                                    <option value="guide">🔵 Guide (Pemandu)</option>
+                                    <option value="porter">🟠 Porter</option>
+                                </select>
+                            </div>
+
+                            {{-- Nomor sertifikat APGI (hanya jika guide) --}}
+                            <div class="form-group mt-2" x-show="pax.role === 'guide'" x-transition>
+                                <label class="form-label" style="font-size:.72rem;">
+                                    Nomor Sertifikat APGI
+                                    <span style="color:#ef4444;">*</span>
+                                </label>
+                                <input type="text" :name="'participants['+idx+'][certification_number]'"
+                                       x-model="pax.certification_number"
+                                       class="form-input"
+                                       placeholder="Contoh: APGI-2024-12345">
+                                <p class="text-xs mt-1" style="color:var(--color-text-muted);">
+                                    Guide wajib memiliki sertifikasi APGI + BNSP yang masih berlaku.
+                                </p>
+                            </div>
                         </div>
                     </template>
+                </div>
+
+                {{-- Ratio warnings --}}
+                <div x-show="ratioWarning" x-transition
+                     class="rounded-lg px-4 py-3 mt-3"
+                     style="background:#fef9c3;border:1px solid #fde047;">
+                    <p class="text-sm font-medium" style="color:#92400e;" x-text="ratioWarning"></p>
+                    <p class="text-xs mt-1" style="color:#a16207;">Berdasarkan SOP Pendakian TNGR 2025</p>
+                </div>
+                <div x-show="porterRatioWarning" x-transition
+                     class="rounded-lg px-4 py-3 mt-2"
+                     style="background:#fef9c3;border:1px solid #fde047;">
+                    <p class="text-sm font-medium" style="color:#92400e;" x-text="porterRatioWarning"></p>
                 </div>
 
                 <div style="margin-top:.875rem;font-size:.78rem;color:var(--color-text-muted);">
                     Total peserta: <strong x-text="participants.length"></strong>
                     <span x-show="maxPax > 0"> — maks. <span x-text="maxPax"></span> orang</span>
+                </div>
+
+                {{-- UMKM Marketplace -- Coming Soon --}}
+                <div class="card mt-4" style="border:1px dashed var(--color-border);background:var(--color-bg);">
+                    <div class="flex items-center gap-2 mb-3">
+                        <h3 class="font-semibold text-sm">Tambah Layanan (Opsional)</h3>
+                        <span class="badge" style="background:#f3f4f6;color:var(--color-text-muted);font-size:0.65rem;">Segera Hadir</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="rounded-lg p-3 text-center" style="background:white;border:1px solid var(--color-border);opacity:0.6;">
+                            <div class="text-2xl mb-1">🔵</div>
+                            <div class="text-xs font-semibold mb-1">Guide Bersertifikat</div>
+                            <div class="text-xs" style="color:var(--color-text-muted);">Pemandu APGI terverifikasi per kawasan</div>
+                            <div class="mt-2 text-xs" style="color:var(--color-forest-600);font-weight:600;">Segera Hadir</div>
+                        </div>
+                        <div class="rounded-lg p-3 text-center" style="background:white;border:1px solid var(--color-border);opacity:0.6;">
+                            <div class="text-2xl mb-1">🟠</div>
+                            <div class="text-xs font-semibold mb-1">Porter Lokal</div>
+                            <div class="text-xs" style="color:var(--color-text-muted);">Porter terdata dari masyarakat sekitar kawasan</div>
+                            <div class="mt-2 text-xs" style="color:var(--color-forest-600);font-weight:600;">Segera Hadir</div>
+                        </div>
+                        <div class="rounded-lg p-3 text-center" style="background:white;border:1px solid var(--color-border);opacity:0.6;">
+                            <div class="text-2xl mb-1">🎒</div>
+                            <div class="text-xs font-semibold mb-1">Sewa Alat</div>
+                            <div class="text-xs" style="color:var(--color-text-muted);">Direktori penyewa alat lokal per kawasan</div>
+                            <div class="mt-2 text-xs" style="color:var(--color-forest-600);font-weight:600;">Segera Hadir</div>
+                        </div>
+                    </div>
+                    <p class="text-xs mt-3" style="color:var(--color-text-muted);">
+                        Di fase berikutnya, kamu bisa memilih guide, porter, dan menyewa alat langsung dari sini — semua terverifikasi, semua tercatat dalam sistem monitoring keselamatan.
+                    </p>
                 </div>
             </div>
 
@@ -558,13 +627,21 @@
             tosAccepted: false,
             _fp: null,
             participants: [
-                { name: '{{ addslashes($user->name) }}', nik: '{{ $user->nik ?? '' }}' }
+                { name: '{{ addslashes($user->name) }}', nik: '{{ $user->nik ?? '' }}', role: 'hiker', certification_number: '' }
             ],
 
             init() {
                 @if(old('mountain_id'))
                     this.selectedMountainId = {{ old('mountain_id') }};
                     this.step = 4;
+                @else
+                    // Pre-fill dari URL param (dikirim dari Explore drawer)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const preselectId = urlParams.get('mountain_id') || '{{ $preselect ?? "" }}';
+                    if (preselectId) {
+                        this.selectedMountainId = parseInt(preselectId);
+                        this.loadTrails().then(() => { this.step = 2; });
+                    }
                 @endif
             },
 
@@ -665,12 +742,30 @@
                 return this.basePrice * this.participants.length;
             },
 
+            get hikerCount() { return this.participants.filter(p => p.role === 'hiker').length; },
+            get guideCount() { return this.participants.filter(p => p.role === 'guide').length; },
+            get porterCount() { return this.participants.filter(p => p.role === 'porter').length; },
+
+            get ratioWarning() {
+                if (this.guideCount === 0) return null;
+                if (this.hikerCount / this.guideCount > 5)
+                    return `⚠️ Rasio guide:pendaki melebihi batas (1:5). Tambah ${Math.ceil(this.hikerCount / 5) - this.guideCount} guide lagi.`;
+                return null;
+            },
+
+            get porterRatioWarning() {
+                if (this.porterCount === 0) return null;
+                if (this.hikerCount / this.porterCount > 3)
+                    return `⚠️ Rasio porter:pendaki melebihi batas (1:3). Tambah ${Math.ceil(this.hikerCount / 3) - this.porterCount} porter lagi.`;
+                return null;
+            },
+
             addParticipant() {
                 if (this.maxPax && this.participants.length >= this.maxPax) {
                     alert(`Maksimal ${this.maxPax} peserta.`);
                     return;
                 }
-                this.participants.push({ name: '', nik: '' });
+                this.participants.push({ name: '', nik: '', role: 'hiker', certification_number: '' });
             },
 
             removeParticipant(idx) {
@@ -701,4 +796,4 @@
         }
     }
     </script>
-</x-layouts.web>
+</x-layouts.mobile>

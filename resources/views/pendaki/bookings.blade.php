@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>Booking Saya</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Booking Saya']</x-slot:breadcrumb>
 
     {{-- Profile incomplete warning --}}
     @if(!Auth::user()->nik && !Auth::user()->passport_number)
@@ -90,4 +89,4 @@
     </div>
     @endif
 
-</x-layouts.web>
+</x-layouts.mobile>

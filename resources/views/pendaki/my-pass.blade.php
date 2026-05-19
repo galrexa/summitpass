@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>QR SummitPass</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'QR Pass Saya']</x-slot:breadcrumb>
 
     <x-slot:head>
         <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -137,4 +136,4 @@
     });
     </script>
 
-</x-layouts.web>
+</x-layouts.mobile>

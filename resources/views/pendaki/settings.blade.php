@@ -1,6 +1,5 @@
-<x-layouts.web>
+<x-layouts.mobile>
     <x-slot:title>Pengaturan Akun</x-slot:title>
-    <x-slot:breadcrumb>['SummitPass', 'Pengaturan Akun']</x-slot:breadcrumb>
 
     <div style="max-width:560px;">
 
@@ -79,4 +78,4 @@
 
     </div>
 
-</x-layouts.web>
+</x-layouts.mobile>

@@ -164,12 +164,18 @@ class SimulateScanController extends Controller
                 . ($booking->is_cross_trail ? " → {$booking->effectiveTrailOut()->name}" : "");
         }
 
+        $mountain  = $booking->mountain;
+        $latitude  = $request->latitude  ?? ($mountain->latitude  ? $mountain->latitude  + (rand(-100, 100) / 10000) : null);
+        $longitude = $request->longitude ?? ($mountain->longitude ? $mountain->longitude + (rand(-100, 100) / 10000) : null);
+
         TrekkingLog::create([
             'qr_pass_id'          => $qrPass->id,
             'trail_checkpoint_id' => $checkpoint->id,
             'direction'           => $direction,
             'scanned_at'          => now(),
             'scanned_by_user_id'  => Auth::id(),
+            'latitude'            => $latitude,
+            'longitude'           => $longitude,
             'anomaly_flag'        => $anomalyFlag,
             'anomaly_reason'      => $anomalyReason,
         ]);

@@ -9,12 +9,16 @@ class BookingParticipant extends Model
 {
     use HasFactory;
 
+    const ROLES = ['hiker', 'guide', 'porter'];
+
     protected $fillable = [
         'booking_id',
         'user_id',
         'nik',
         'name',
         'role',
+        'certification_number',
+        'affiliation',
     ];
 
     protected $hidden = [
@@ -44,5 +48,23 @@ class BookingParticipant extends Model
     public function getMaskedNikAttribute(): string
     {
         return substr($this->nik, 0, 4) . '**********' . substr($this->nik, -2);
+    }
+
+    public function getRoleLabelAttribute(): string
+    {
+        return match($this->role) {
+            'guide'  => 'Guide',
+            'porter' => 'Porter',
+            default  => 'Pendaki',
+        };
+    }
+
+    public function getRoleBadgeColorAttribute(): string
+    {
+        return match($this->role) {
+            'guide'  => 'badge-blue',
+            'porter' => 'badge-amber',
+            default  => 'badge-green',
+        };
     }
 }

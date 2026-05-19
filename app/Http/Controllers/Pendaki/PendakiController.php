@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Pendaki;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingParticipant;
+use App\Models\Mountain;
 use App\Models\TrekkingLog;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PendakiController extends Controller
@@ -13,6 +15,64 @@ class PendakiController extends Controller
     public function bookings()
     {
         return view('pendaki.bookings');
+    }
+
+    public function explore()
+    {
+        $mountains = Mountain::active()
+            ->withQuotaSummary()
+            ->with(['regulation', 'trails' => fn($q) => $q->active()])
+            ->orderBy('name')
+            ->get();
+
+        return view('pendaki.explore', compact('mountains'));
+    }
+
+    public function mountainDetail($id)
+    {
+        $mountain = Mountain::with(['regulation', 'trails' => fn($q) => $q->active()])
+            ->findOrFail($id);
+
+        $weekStart = now()->startOfWeek();
+        $weekEnd   = now()->endOfWeek();
+        $bookedThisWeek = Booking::where('mountain_id', $id)
+            ->whereBetween('start_date', [$weekStart, $weekEnd])
+            ->whereIn('status', ['paid', 'active'])
+            ->count();
+
+        $quotaPerDay   = $mountain->regulation->quota_per_trail_per_day ?? 50;
+        $trailCount    = max(1, $mountain->trails->count());
+        $slotRemaining = max(0, ($quotaPerDay * 7 * $trailCount) - $bookedThisWeek);
+
+        return response()->json([
+            'mountain'       => $mountain,
+            'slot_remaining' => $slotRemaining,
+            'booked_week'    => $bookedThisWeek,
+        ]);
+    }
+
+    public function mountainWeather($id)
+    {
+        $mountain = Mountain::findOrFail($id);
+        $altitude = $mountain->height_mdpl ?? 2000;
+
+        // Mock weather — colder at higher altitude
+        $baseTemp = max(5, 28 - intval($altitude / 300));
+        $conditions = [
+            ['icon' => 'partly-cloudy', 'condition' => 'Berawan sebagian', 'wind' => rand(10, 18)],
+            ['icon' => 'cloud',         'condition' => 'Berawan',          'wind' => rand(12, 22)],
+            ['icon' => 'rain',          'condition' => 'Hujan ringan',     'wind' => rand(15, 25)],
+            ['icon' => 'sun',           'condition' => 'Cerah',            'wind' => rand(8, 15)],
+        ];
+        $pool = collect($conditions)->shuffle();
+
+        return response()->json([
+            'forecast' => [
+                ['day' => 'Hari ini', 'temp_c' => $baseTemp,     'condition' => $pool[0]['condition'], 'wind_kmh' => $pool[0]['wind'], 'icon' => $pool[0]['icon']],
+                ['day' => 'Besok',    'temp_c' => $baseTemp + 2,  'condition' => $pool[1]['condition'], 'wind_kmh' => $pool[1]['wind'], 'icon' => $pool[1]['icon']],
+                ['day' => 'Lusa',     'temp_c' => $baseTemp + 1,  'condition' => $pool[2]['condition'], 'wind_kmh' => $pool[2]['wind'], 'icon' => $pool[2]['icon']],
+            ],
+        ]);
     }
 
     public function trekkingLog()
@@ -125,5 +185,21 @@ class PendakiController extends Controller
     public function settings()
     {
         return view('pendaki.settings', ['user' => Auth::user()]);
+    }
+
+    public function familyLink()
+    {
+        $user = Auth::user();
+
+        $participants = \App\Models\BookingParticipant::with([
+                'booking.mountain',
+                'qrPass',
+            ])
+            ->where('user_id', $user->id)
+            ->whereHas('booking', fn ($q) => $q->whereIn('status', ['paid', 'active']))
+            ->whereHas('qrPass')
+            ->get();
+
+        return view('pendaki.family-link', compact('participants'));
     }
 }

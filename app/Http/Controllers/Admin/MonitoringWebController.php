@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\QrPass;
-use App\Models\TrekkingLog;
 use App\Models\Booking;
+use App\Models\QrPass;
+use App\Models\TrailCheckpoint;
+use App\Models\TrekkingLog;
 
 class MonitoringWebController extends Controller
 {
     public function index()
     {
-        // Pendaki yang sedang aktif di jalur (QrPass status active)
         $activePasses = QrPass::with([
                 'participant.booking.mountain',
                 'participant.booking.trail',
@@ -21,7 +21,6 @@ class MonitoringWebController extends Controller
             ->orderBy('valid_from')
             ->get();
 
-        // Alert anomali: trekking log yang ada anomaly_flag = true
         $anomalyLogs = TrekkingLog::with([
                 'qrPass.participant.booking.mountain',
                 'qrPass.participant.booking.trail',
@@ -33,7 +32,6 @@ class MonitoringWebController extends Controller
             ->limit(30)
             ->get();
 
-        // QrPass yang expired (belum checkout)
         $expiredPasses = QrPass::with([
                 'participant.booking.mountain',
                 'participant.booking.trail',
@@ -44,7 +42,6 @@ class MonitoringWebController extends Controller
             ->limit(20)
             ->get();
 
-        // Summary stats
         $stats = [
             'active_now'     => $activePasses->count(),
             'anomalies'      => $anomalyLogs->count(),
@@ -53,8 +50,18 @@ class MonitoringWebController extends Controller
                                     ->whereDate('start_date', '<=', today())
                                     ->whereDate('end_date', '>=', today())
                                     ->count(),
+            'active_hikers'  => $activePasses->filter(fn($p) => ($p->participant->role ?? 'hiker') === 'hiker')->count(),
+            'active_guides'  => $activePasses->filter(fn($p) => $p->participant->role === 'guide')->count(),
+            'active_porters' => $activePasses->filter(fn($p) => $p->participant->role === 'porter')->count(),
         ];
 
-        return view('admin.monitoring.index', compact('activePasses', 'anomalyLogs', 'expiredPasses', 'stats'));
+        $checkpoints = TrailCheckpoint::with([
+                'trekkingLogs' => fn ($q) => $q->latest('scanned_at')->limit(1)->with('qrPass.participant'),
+            ])
+            ->whereHas('trail.mountain', fn ($q) => $q->where('pengelola_id', auth()->id()))
+            ->orderBy('order_seq')
+            ->get();
+
+        return view('admin.monitoring.index', compact('activePasses', 'anomalyLogs', 'expiredPasses', 'stats', 'checkpoints'));
     }
 }

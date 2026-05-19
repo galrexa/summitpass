@@ -1,22 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer require:*)",
-      "Bash(php composer.phar require dedoc/scramble --dev)",
-      "Bash(where composer:*)",
-      "Bash(php -r \"echo PHP_EOL;\")",
-      "Bash(where php:*)",
-      "Bash(where composer.bat)",
-      "Bash(dir \"C:\\\\ProgramData\\\\ComposerSetup\\\\bin\")",
-      "Bash(\"C:\\\\ProgramData\\\\ComposerSetup\\\\bin\\\\composer\" require:*)",
-      "Bash(npm install:*)",
-      "Bash(php artisan:*)",
-      "Bash(PROJECT=\"c:/Users/Bappisus/Documents/PIDI x Hackathon/Source Code/summitpass\")",
-      "Bash(SRC=\"C:/Users/Bappisus/Downloads/update code/code\")",
-      "Bash(__NEW_LINE_4ea0487f40322d89__ cp:*)",
-      "Bash(cp \"$SRC/2026_03_27_000002_add_shared_group_to_trail_checkpoints_table.php\" \"$PROJECT/database/migrations/\")",
-      "Bash(cp \"$SRC/Booking.php\" \"$PROJECT/app/Models/Booking.php\")",
-      "Bash(find 'c:\\\\Users\\\\Bappisus\\\\Documents\\\\PIDI x Hackathon\\\\Source Code\\\\summitpass/public' -type f -name *.svg -o -name *.png -o -name *.jpg -o -name *.jpeg -o -name favicon*)"
+      "Bash(php artisan *)",
+      "Bash(php -l app/Models/BookingParticipant.php)",
+      "Bash(php -l app/Models/Mountain.php)",
+      "Bash(php -l app/Models/QrPass.php)",
+      "Bash(php -l app/Http/Controllers/Admin/MonitoringWebController.php)",
+      "Bash(php -l app/Http/Controllers/FamilyTrackingController.php)"
     ]
   }
 }

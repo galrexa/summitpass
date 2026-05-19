@@ -785,6 +785,46 @@
     </div>
 </div>
 
+{{-- Section: Tiga Peran, Satu Sistem --}}
+<section id="ekosistem" style="padding:4rem 0;background:white;position:relative;z-index:1;">
+    <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem;">
+        <div class="text-center mb-10" style="text-align:center;margin-bottom:2.5rem;">
+            <div class="feat-tag" style="display:inline-flex;margin-bottom:.75rem;">Ekosistem monitoring inklusif</div>
+            <h2 class="section-title" style="margin-bottom:.5rem;">Semua yang masuk kawasan, terlindungi.</h2>
+            <p class="section-sub" style="margin:0 auto;text-align:center;">Bukan hanya pendaki. Setiap orang yang masuk kawasan tercatat identitas dan posisi GPS-nya.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+            <div style="background:white;border:1px solid rgba(120,113,108,.12);border-left:4px solid #16a34a;border-radius:var(--r-lg);padding:1.75rem 1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.05);">
+                <div style="font-size:2rem;margin-bottom:.75rem;">🟢</div>
+                <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;">Pendaki (HIKER)</div>
+                <div style="font-size:.8rem;color:var(--stone);line-height:1.65;">
+                    Identitas terverifikasi via NIK. Gelang RFID+GPS aktif sepanjang pendakian.
+                    Keluarga pantau posisi real-time tanpa install app.
+                </div>
+            </div>
+
+            <div style="background:white;border:1px solid rgba(120,113,108,.12);border-left:4px solid #0369a1;border-radius:var(--r-lg);padding:1.75rem 1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.05);">
+                <div style="font-size:2rem;margin-bottom:.75rem;">🔵</div>
+                <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;">Guide (GUIDE)</div>
+                <div style="font-size:.8rem;color:var(--stone);line-height:1.65;">
+                    Wajib bersertifikat APGI + BNSP. Terima notifikasi anomali pertama sebagai PIC lapangan.
+                    Rasio 1 guide : maks 5 pendaki divalidasi otomatis saat booking.
+                </div>
+            </div>
+
+            <div style="background:white;border:1px solid rgba(120,113,108,.12);border-left:4px solid #f59e0b;border-radius:var(--r-lg);padding:1.75rem 1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.05);">
+                <div style="font-size:2rem;margin-bottom:.75rem;">🟠</div>
+                <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;">Porter (PORTER)</div>
+                <div style="font-size:.8rem;color:var(--stone);line-height:1.65;">
+                    Masyarakat lokal terdata dengan verifikasi KTP domisili.
+                    Mendapat gelang RFID+GPS dan masuk radar monitoring — naik kelas dari informal ke mitra resmi.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- Cara Kerja --}}
 <section id="cara-kerja" style="padding: 7rem 2rem; max-width: 1160px; margin: 0 auto; position: relative; z-index: 1;">
     <div class="how-header">
@@ -820,6 +860,19 @@
                     <span class="step-warn-badge">Tersedia tanpa sinyal</span>
                 </div>
             </div>
+            <div class="step-item" style="border-left:2px dashed #bbf7d0;margin-left:21px;padding-left:1.5rem;padding-top:.5rem;padding-bottom:.5rem;border-radius:0;">
+                <div style="margin-left:-2.6rem;margin-right:0.75rem;">
+                    <div style="width:44px;height:44px;border-radius:50%;background:#166534;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;box-shadow:0 0 0 6px var(--stone-xl);">IoT</div>
+                </div>
+                <div class="step-content">
+                    <div class="step-lbl">SummitPost Unit bekerja diam-diam</div>
+                    <div class="step-desc">Di setiap pos, SummitPost Unit — perangkat mandiri bertenaga surya dengan RFID reader dan modul LoRa — membaca gelang pendaki secara otomatis. Tanpa sinyal seluler. Tanpa tindakan dari pendaki.</div>
+                    <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+                        <span class="step-warn-badge" style="background:#dcfce7;color:#166534;">HF RFID — MVP</span>
+                        <span class="step-warn-badge" style="background:#f3f4f6;color:#6b7280;">UHF Otomatis — Roadmap</span>
+                    </div>
+                </div>
+            </div>
             <div class="step-item">
                 <div class="step-num-circle">4</div>
                 <div class="step-content">
@@ -834,6 +887,77 @@
                     <div class="step-desc">Scan keluar di gerbang. Rekam jejak pendakian tersimpan selamanya — data untuk SAR, kenangan untuk kamu.</div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+{{-- ===================================================
+     SECTION: MOUNTAIN SPOTLIGHT
+================================================== --}}
+<section id="destinasi" style="padding:5rem 2rem;background:var(--off-white,#f9fafb);position:relative;z-index:1;">
+    <div style="max-width:1100px;margin:0 auto;">
+        <div class="reveal" style="text-align:center;margin-bottom:2.5rem;">
+            <div class="section-tag">Destinasi populer minggu ini</div>
+            <h2 class="section-title" style="margin-bottom:.5rem;">Gunung yang<br>sedang ramai didaki.</h2>
+            <p class="section-sub" style="margin:0 auto;text-align:center;">Slot terbatas — booking lebih awal, pendakian lebih tenang.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;" class="reveal">
+            @forelse($spotlightMountains ?? [] as $mountain)
+            @php
+                $quota      = $mountain->regulation?->quota_per_trail_per_day ?? 50;
+                $booked     = $mountain->booked_this_week ?? 0;
+                $totalSlots = $quota * 7;
+                $pct        = $totalSlots > 0 ? min(100, round($booked / $totalSlots * 100)) : 0;
+                $availText  = $pct < 50 ? '✓ Tersedia' : ($pct < 90 ? '⚠ Hampir penuh' : '✕ Terbatas');
+                $availColor = $pct < 50 ? '#15803d' : ($pct < 90 ? '#b45309' : '#dc2626');
+                $availBg    = $pct < 50 ? '#dcfce7'  : ($pct < 90 ? '#fef3c7' : '#fee2e2');
+                $gradients  = ['I'=>'#166534','II'=>'#166534','III'=>'#78350f','IV'=>'#7f1d1d','V'=>'#450a0a'];
+                $gradColor  = $gradients[$mountain->grade] ?? '#1e3a5f';
+            @endphp
+            <div style="border-radius:16px;overflow:hidden;background:white;border:1.5px solid #e5e7eb;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;"
+                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
+                 onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(0,0,0,.06)'">
+                {{-- Hero --}}
+                <div style="height:130px;background:linear-gradient(160deg,{{ $gradColor }} 0%,{{ $gradColor }}cc 100%);position:relative;display:flex;align-items:flex-end;padding:1rem;">
+                    <svg style="position:absolute;bottom:0;left:0;right:0;width:100%;height:70px;opacity:.15;" viewBox="0 0 300 70" preserveAspectRatio="none" fill="white">
+                        <path d="M0,70 L60,20 L100,45 L150,5 L200,35 L250,15 L300,50 L300,70 Z"/>
+                    </svg>
+                    <div style="position:relative;z-index:1;width:100%;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                            <div>
+                                <div style="font-size:1.1rem;font-weight:800;color:white;text-shadow:0 1px 4px rgba(0,0,0,.3);">{{ $mountain->name }}</div>
+                                <div style="font-size:.75rem;color:rgba(255,255,255,.8);">{{ $mountain->location }}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:.7rem;font-weight:700;background:rgba(0,0,0,.35);color:white;padding:.25rem .6rem;border-radius:20px;">{{ number_format($mountain->height_mdpl) }} mdpl</div>
+                                <div style="font-size:.65rem;color:rgba(255,255,255,.7);margin-top:.25rem;">Grade {{ $mountain->grade }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{-- Body --}}
+                <div style="padding:1rem 1.25rem 1.25rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.625rem;">
+                        <span style="font-size:.72rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;background:{{ $availBg }};color:{{ $availColor }};">{{ $availText }}</span>
+                        <span style="font-size:.72rem;color:#6b7280;">{{ $mountain->regulation?->max_hiking_days ?? '—' }} hari maks</span>
+                    </div>
+                    {{-- Quota bar --}}
+                    <div style="height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden;margin-bottom:.375rem;">
+                        <div style="height:100%;width:{{ $pct }}%;background:{{ $pct > 80 ? '#ef4444' : ($pct > 50 ? '#f59e0b' : '#22c55e') }};border-radius:2px;"></div>
+                    </div>
+                    <div style="font-size:.68rem;color:#9ca3af;margin-bottom:1rem;">{{ 100 - $pct }}% slot tersisa minggu ini</div>
+                    <a href="{{ route('register') }}?intent=mountain&id={{ $mountain->id }}"
+                       style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.6rem 1rem;border-radius:8px;background:#f0fdf4;color:#166534;font-size:.82rem;font-weight:600;text-decoration:none;border:1.5px solid #bbf7d0;transition:background .15s;"
+                       onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                        Lihat detail & booking
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+                    </a>
+                </div>
+            </div>
+            @empty
+            <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;font-size:.875rem;">Data gunung belum tersedia.</div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -1154,6 +1278,21 @@
             </div>
             <div class="comp-row">
                 <div class="comp-feat">Tombol SOS terintegrasi</div>
+                <div style="text-align:center"><span class="chip-no">✗</span></div>
+                <div style="text-align:center"><span class="chip-yes">✓</span></div>
+            </div>
+            <div class="comp-row">
+                <div class="comp-feat">GPS tracking real-time di seluruh jalur</div>
+                <div style="text-align:center"><span class="chip-no">✗</span></div>
+                <div style="text-align:center"><span class="chip-yes">✓</span></div>
+            </div>
+            <div class="comp-row">
+                <div class="comp-feat">Guide &amp; porter masuk sistem monitoring</div>
+                <div style="text-align:center"><span class="chip-no">✗</span></div>
+                <div style="text-align:center"><span class="chip-yes">✓</span></div>
+            </div>
+            <div class="comp-row">
+                <div class="comp-feat">Infrastruktur IoT mandiri (tanpa sinyal seluler)</div>
                 <div style="text-align:center"><span class="chip-no">✗</span></div>
                 <div style="text-align:center"><span class="chip-yes">✓</span></div>
             </div>

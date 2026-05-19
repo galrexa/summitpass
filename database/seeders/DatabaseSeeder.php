@@ -2,13 +2,18 @@
 
 namespace Database\Seeders;
 
+use App\Models\Booking;
+use App\Models\BookingParticipant;
 use App\Models\Mountain;
 use App\Models\MountainRegulation;
+use App\Models\QrPass;
 use App\Models\Trail;
 use App\Models\TrailCheckpoint;
+use App\Models\TrekkingLog;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -45,13 +50,17 @@ class DatabaseSeeder extends Seeder
 
         // ── Gunung Rinjani (contoh data) ──────────────────────────────────
         $rinjani = Mountain::create([
-            'name'        => 'Gunung Rinjani',
-            'location'    => 'Lombok Utara',
-            'province'    => 'Nusa Tenggara Barat',
-            'height_mdpl' => 3726,
-            'grade'       => 'IV',
-            'description' => 'Gunung berapi aktif tertinggi kedua di Indonesia, terletak di Pulau Lombok.',
-            'is_active'   => true,
+            'name'           => 'Gunung Rinjani',
+            'location'       => 'Lombok Utara',
+            'province'       => 'Nusa Tenggara Barat',
+            'height_mdpl'    => 3726,
+            'grade'          => 'IV',
+            'description'    => 'Gunung berapi aktif tertinggi kedua di Indonesia, terletak di Pulau Lombok. Dengan kawah Segara Anak yang memukau dan pemandangan 360° dari puncaknya, Rinjani adalah pengalaman pendakian yang tak terlupakan.',
+            'ecosystem_type' => 'Hutan hujan tropis, savana alpine, danau kawah vulkanik',
+            'trail_status'   => 'open',
+            'is_active'      => true,
+            'latitude'       => -8.4119,
+            'longitude'      => 116.4648,
         ]);
 
         MountainRegulation::create([
@@ -97,13 +106,17 @@ class DatabaseSeeder extends Seeder
 
         // ── Gunung Gede ───────────────────────────────────────────────────
         $gede = Mountain::create([
-            'name'        => 'Gunung Gede',
-            'location'    => 'Cianjur / Sukabumi',
-            'province'    => 'Jawa Barat',
-            'height_mdpl' => 2958,
-            'grade'       => 'III',
-            'description' => 'Gunung populer di Taman Nasional Gunung Gede Pangrango.',
-            'is_active'   => true,
+            'name'           => 'Gunung Gede',
+            'location'       => 'Cianjur / Sukabumi',
+            'province'       => 'Jawa Barat',
+            'height_mdpl'    => 2958,
+            'grade'          => 'III',
+            'description'    => 'Gunung populer di Taman Nasional Gunung Gede Pangrango, cocok untuk pendaki menengah. Jalur via Cibodas melewati air terjun Cibeureum yang terkenal dan hutan montana yang rimbun.',
+            'ecosystem_type' => 'Hutan montana, hutan hujan dataran tinggi, padang edelweiss',
+            'trail_status'   => 'open',
+            'is_active'      => true,
+            'latitude'       => -6.7814,
+            'longitude'      => 106.9834,
         ]);
 
         MountainRegulation::create([
@@ -123,5 +136,61 @@ class DatabaseSeeder extends Seeder
             'route_order' => 1,
             'is_active'   => true,
         ]);
+
+        // ── Demo booking dengan guide & porter ────────────────────────────
+        $pendaki = User::where('email', 'budi@example.com')->first();
+        $pengelola = User::where('email', 'pengelola@tngr.id')->first();
+        $rinjani->update(['pengelola_id' => $pengelola->id]);
+
+        $booking = Booking::create([
+            'leader_user_id' => $pendaki->id,
+            'mountain_id'    => $rinjani->id,
+            'trail_id'       => $jalurSembalun->id,
+            'booking_code'   => 'SP-2026-001',
+            'start_date'     => now()->addDays(3)->toDateString(),
+            'end_date'       => now()->addDays(6)->toDateString(),
+            'status'         => 'active',
+            'total_price'    => 150000 * 3,
+        ]);
+
+        $participants = [
+            ['name' => 'Budi Pendaki', 'nik' => '3201010101010001', 'role' => 'hiker', 'user_id' => $pendaki->id],
+            ['name' => 'Pak Rudi Santoso', 'nik' => '3201234567890002', 'role' => 'guide', 'certification_number' => 'APGI-2024-00456'],
+            ['name' => 'Asep Supriatna', 'nik' => '3201234567890003', 'role' => 'porter'],
+        ];
+
+        foreach ($participants as $pData) {
+            $bp = BookingParticipant::create([
+                'booking_id'           => $booking->id,
+                'user_id'              => $pData['user_id'] ?? null,
+                'name'                 => $pData['name'],
+                'nik'                  => $pData['nik'],
+                'role'                 => $pData['role'],
+                'certification_number' => $pData['certification_number'] ?? null,
+            ]);
+
+            $qrPass = QrPass::create([
+                'booking_participant_id' => $bp->id,
+                'qr_token'               => QrPass::generateToken(),
+                'valid_from'             => now()->addDays(3),
+                'valid_until'            => now()->addDays(7),
+                'status'                 => 'active',
+                'family_token'           => Str::random(32),
+            ]);
+        }
+
+        // Satu token hardcode untuk demo
+        QrPass::first()?->update(['family_token' => 'demo-keluarga-001']);
+
+        // Seed GPS coordinates untuk trekking logs yang ada
+        TrekkingLog::all()->each(function ($log) {
+            $mountain = $log->checkpoint?->trail?->mountain;
+            if ($mountain?->latitude && !$log->latitude) {
+                $log->update([
+                    'latitude'  => $mountain->latitude  + (rand(-200, 200) / 10000),
+                    'longitude' => $mountain->longitude + (rand(-200, 200) / 10000),
+                ]);
+            }
+        });
     }
 }

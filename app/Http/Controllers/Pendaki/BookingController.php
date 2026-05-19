@@ -25,7 +25,7 @@ class BookingController extends Controller
         return view('pendaki.bookings', compact('bookings'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
 
@@ -38,7 +38,9 @@ class BookingController extends Controller
             ->with(['regulation', 'trails' => fn($q) => $q->active()])
             ->get();
 
-        return view('pendaki.bookings.create', compact('mountains', 'user'));
+        $preselect = $request->query('mountain_id');
+
+        return view('pendaki.bookings.create', compact('mountains', 'user', 'preselect'));
     }
 
     public function store(Request $request)
