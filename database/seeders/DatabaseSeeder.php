@@ -137,6 +137,95 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
+        // ── Gunung Semeru (Grade IV - Advanced) ───────────────────────────
+        $semeru = Mountain::create([
+            'name'           => 'Gunung Semeru',
+            'location'       => 'Lumajang',
+            'province'       => 'Jawa Timur',
+            'height_mdpl'    => 3676,
+            'grade'          => 'IV',
+            'description'    => 'Gunung tertinggi di Pulau Jawa. Dikenal dengan sebutan Mahameru, puncak tertinggi yang menantang dengan jalur berpasir dan cuaca ekstrem. Semeru adalah gunung berapi aktif dengan letusan periodik setiap 15-30 menit.',
+            'ecosystem_type' => 'Hutan montana, padang savana, kawah aktif',
+            'trail_status'   => 'open',
+            'is_active'      => true,
+            'latitude'       => -8.1077,
+            'longitude'      => 112.9225,
+        ]);
+
+        MountainRegulation::create([
+            'mountain_id'                  => $semeru->id,
+            'base_price'                   => 50000,
+            'quota_per_trail_per_day'      => 100,
+            'max_hiking_days'              => 4,
+            'max_participants_per_account' => 10,
+            'guide_required'               => true,
+            'guide_requirement_level'      => 'mandatory',
+            'guide_ratio_max_hikers'       => 10,
+            'guide_price_per_day'          => 150000,
+            'checkout_deadline_hour'       => 14,
+            'min_elevation_experience'     => 2500, // ← KUNCI: Butuh pengalaman 2500 MDPL
+        ]);
+
+        Trail::create([
+            'mountain_id' => $semeru->id,
+            'name'        => 'Jalur Ranu Pani',
+            'description' => 'Jalur utama via Ranu Pani, melewati Ranu Kumbolo yang indah.',
+            'grade'       => 'IV',
+            'route_order' => 1,
+            'is_active'   => true,
+        ]);
+
+        // ── Update Regulasi Gunung Existing ───────────────────────────────
+        // Rinjani: Grade IV, butuh pengalaman 3000 MDPL
+        MountainRegulation::where('mountain_id', $rinjani->id)->update([
+            'min_elevation_experience' => 3000,
+            'guide_requirement_level'  => 'mandatory',
+        ]);
+
+        // Gede: Grade III, butuh pengalaman 1500 MDPL
+        MountainRegulation::where('mountain_id', $gede->id)->update([
+            'min_elevation_experience' => 1500,
+        ]);
+
+        // ── Demo Users untuk Testing ──────────────────────────────────────
+        // User 1: Pendaki Pemula (belum pernah mendaki)
+        $pemula = User::factory()->create([
+            'name'     => 'Andi Pemula',
+            'email'    => 'pemula@example.com',
+            'nik'      => '3201010101990001',
+            'password' => Hash::make('pemula123'),
+        ]);
+
+        // User 2: Pendaki Berpengalaman (sudah pernah ke Gede)
+        $expert = User::factory()->create([
+            'name'     => 'Siti Berpengalaman',
+            'email'    => 'expert@example.com',
+            'nik'      => '3201010101980002',
+            'password' => Hash::make('expert123'),
+        ]);
+
+        // Buat booking completed untuk expert ke Gede (untuk pengalaman 2958 MDPL)
+        $trailGede = Trail::where('mountain_id', $gede->id)->first();
+        $bookingGede = Booking::create([
+            'leader_user_id' => $expert->id,
+            'mountain_id'    => $gede->id,
+            'trail_id'       => $trailGede->id,
+            'booking_code'   => 'SP-DEMO-GEDE',
+            'start_date'     => now()->subDays(30),
+            'end_date'       => now()->subDays(28),
+            'status'         => 'completed', // ← PENTING: Status completed
+            'total_price'    => 29000,
+            'tos_accepted_at'=> now()->subDays(30),
+        ]);
+
+        BookingParticipant::create([
+            'booking_id' => $bookingGede->id,
+            'user_id'    => $expert->id,
+            'name'       => 'Siti Berpengalaman',
+            'nik'        => '3201010101980002',
+            'role'       => 'leader',
+        ]);
+
         // ── Demo booking dengan guide & porter ────────────────────────────
         $pendaki = User::where('email', 'budi@example.com')->first();
         $pengelola = User::where('email', 'pengelola@tngr.id')->first();

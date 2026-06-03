@@ -68,6 +68,43 @@
             </div>
             @endif
 
+            {{-- Eligibility Warning (dynamic via Alpine) --}}
+            <div x-show="eligibilityWarning.show"
+                 x-transition
+                 style="margin-bottom:1.5rem;padding:1rem;background:#fef2f2;border:1.5px solid:#fecaca;border-radius:12px;">
+                <div style="display:flex;align-items:start;gap:.75rem;">
+                    <svg style="width:1.25rem;height:1.25rem;color:#dc2626;flex-shrink:0;margin-top:.125rem;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <div style="flex:1;">
+                        <h4 style="font-size:.875rem;font-weight:700;color:#991b1b;margin-bottom:.375rem;">Pengalaman Belum Memenuhi Syarat</h4>
+                        <p x-text="eligibilityWarning.message" style="font-size:.8125rem;color:#7f1d1d;line-height:1.5;margin-bottom:.75rem;"></p>
+                        
+                        {{-- Rekomendasi alternatif --}}
+                        <div x-show="eligibilityWarning.recommendations.length > 0">
+                            <p style="font-size:.8125rem;font-weight:600;color:#991b1b;margin-bottom:.5rem;">Coba gunung ini dulu:</p>
+                            <div style="display:flex;flex-direction:column;gap:.5rem;">
+                                <template x-for="rec in eligibilityWarning.recommendations" :key="rec.id">
+                                    <a :href="`?mountain_id=${rec.id}`"
+                                       style="display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;background:white;border-radius:8px;text-decoration:none;transition:all .15s;"
+                                       @mouseenter="$el.style.background='#fef2f2'"
+                                       @mouseleave="$el.style.background='white'">
+                                        <span style="font-size:1.25rem;">🏔️</span>
+                                        <div style="flex:1;">
+                                            <div x-text="rec.name" style="font-size:.8125rem;font-weight:600;color:#991b1b;"></div>
+                                            <div x-text="`${rec.height_mdpl} MDPL`" style="font-size:.75rem;color:#7f1d1d;"></div>
+                                        </div>
+                                        <svg style="width:1rem;height:1rem;color:#dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ─── STEP 1: PILIH GUNUNG ─── --}}
             <div x-show="step === 1">
                 <h2 style="font-size:.95rem;font-weight:700;color:var(--color-text);margin-bottom:1.25rem;">Pilih Gunung</h2>
@@ -608,29 +645,34 @@
     <script>
     function bookingForm() {
         return {
-            step: 1,
-            selectedMountainId: null,
-            selectedMountainName: '',
-            selectedTrailId: null,
-            basePrice: 0,
-            maxPax: 10,
-            maxDays: 7,
-            trails: [],
-            trailsForOut: [],
-            crossTrail: false,
-            trailOutId: '',
-            loadingTrails: false,
-            startDate: '',
-            endDate: '',
-            guideRequested: false,
-            selectedTrailGrade: null,
-            tosAccepted: false,
-            _fp: null,
-            participants: [
-                { name: '{{ addslashes($user->name) }}', nik: '{{ $user->nik ?? '' }}', role: 'hiker', certification_number: '' }
-            ],
+        step: 1,
+        selectedMountainId: null,
+        selectedMountainName: '',
+        selectedTrailId: null,
+        basePrice: 0,
+        maxPax: 10,
+        maxDays: 7,
+        trails: [],
+        trailsForOut: [],
+        crossTrail: false,
+        trailOutId: '',
+        loadingTrails: false,
+        startDate: '',
+        endDate: '',
+        guideRequested: false,
+        selectedTrailGrade: null,
+        tosAccepted: false,
+        _fp: null,
+        participants: [
+            { name: '{{ addslashes($user->name) }}', nik: '{{ $user->nik ?? '' }}', role: 'hiker', certification_number: '' }
+        ],
+        eligibilityWarning: {
+            show: false,
+            message: '',
+            recommendations: []
+        },
 
-            init() {
+        init() {
                 @if(old('mountain_id'))
                     this.selectedMountainId = {{ old('mountain_id') }};
                     this.step = 4;
@@ -657,6 +699,34 @@
                 if (this._fp) {
                     this._fp.clear();
                     this._fp.set('maxDate', null);
+                }
+                
+                // Check eligibility untuk gunung yang dipilih
+                this.checkEligibility(id);
+            },
+
+            async checkEligibility(mountainId) {
+                try {
+                    const response = await fetch(`/api/mountains/${mountainId}/check-eligibility`);
+                    const data = await response.json();
+                    
+                    if (!data.is_eligible) {
+                        // User tidak eligible - tampilkan warning
+                        this.eligibilityWarning.show = true;
+                        this.eligibilityWarning.message = data.message;
+                        
+                        // Load rekomendasi alternatif
+                        const recResponse = await fetch('/api/mountains/recommendations?limit=2');
+                        const recData = await recResponse.json();
+                        this.eligibilityWarning.recommendations = recData.recommendations;
+                    } else {
+                        // User eligible - sembunyikan warning
+                        this.eligibilityWarning.show = false;
+                        this.eligibilityWarning.message = '';
+                        this.eligibilityWarning.recommendations = [];
+                    }
+                } catch (error) {
+                    console.error('Error checking eligibility:', error);
                 }
             },
 

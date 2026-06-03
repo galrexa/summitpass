@@ -103,6 +103,97 @@ class User extends Authenticatable
     }
 
     /**
+     * Cek apakah user eligible untuk mendaki gunung tertentu
+     * berdasarkan pengalaman ketinggian minimum yang dipersyaratkan.
+     *
+     * @param  Mountain  $mountain
+     * @return bool
+     */
+    public function isEligibleForMountain(Mountain $mountain): bool
+    {
+        $regulation = $mountain->regulation;
+        
+        // Jika tidak ada regulasi atau tidak ada syarat pengalaman, allow
+        if (!$regulation || !$regulation->min_elevation_experience) {
+            return true;
+        }
+        
+        // Cek apakah pengalaman user memenuhi syarat
+        return $this->highestSummitMdpl() >= $regulation->min_elevation_experience;
+    }
+
+    /**
+     * Dapatkan pengalaman minimum yang dibutuhkan untuk gunung tertentu.
+     *
+     * @param  Mountain  $mountain
+     * @return int|null  Ketinggian minimum dalam MDPL, atau null jika tidak ada syarat
+     */
+    public function getRequiredExperienceFor(Mountain $mountain): ?int
+    {
+        return $mountain->regulation?->min_elevation_experience;
+    }
+
+    /**
+     * Dapatkan rekomendasi gunung berdasarkan pengalaman user.
+     * Prioritas: gunung yang eligible dan mendorong progres bertahap.
+     *
+     * @param  int  $limit  Jumlah rekomendasi yang diinginkan
+     * @return \Illuminate\Support\Collection<Mountain>
+     */
+    public function getRecommendedMountains(int $limit = 5): \Illuminate\Support\Collection
+    {
+        $userExperience = $this->highestSummitMdpl();
+        
+        return Mountain::active()
+            ->with('regulation')
+            ->get()
+            ->filter(function ($mountain) {
+                // Hanya gunung yang eligible untuk user
+                return $this->isEligibleForMountain($mountain);
+            })
+            ->sortBy(function ($mountain) use ($userExperience) {
+                $minExp = $mountain->regulation?->min_elevation_experience ?? 0;
+                
+                // Prioritas:
+                // 1. Gunung tanpa syarat (untuk pemula) - prioritas tertinggi
+                if ($minExp === 0) {
+                    return 0;
+                }
+                
+                // 2. Gunung yang sedikit lebih tinggi dari pengalaman user
+                //    untuk mendorong progres bertahap
+                $diff = $mountain->height_mdpl - $userExperience;
+                
+                // Gunung yang lebih tinggi dari pengalaman user diprioritaskan
+                // Gunung yang sudah lebih rendah diberi nilai tinggi (prioritas rendah)
+                return $diff > 0 ? $diff : 999999;
+            })
+            ->take($limit);
+    }
+
+    /**
+     * Dapatkan gunung "next challenge" - sedikit lebih sulit dari pengalaman.
+     * Cocok untuk mendorong user naik level secara bertahap.
+     *
+     * @return Mountain|null
+     */
+    public function getNextChallengeMountain(): ?Mountain
+    {
+        $userExperience = $this->highestSummitMdpl();
+        
+        return Mountain::active()
+            ->with('regulation')
+            ->get()
+            ->filter(function ($mountain) use ($userExperience) {
+                // Cari gunung yang 200-500 MDPL lebih tinggi dari pengalaman
+                $diff = $mountain->height_mdpl - $userExperience;
+                return $diff >= 200 && $diff <= 500 && $this->isEligibleForMountain($mountain);
+            })
+            ->sortBy('height_mdpl')
+            ->first();
+    }
+
+    /**
      * Scopes
      */
 

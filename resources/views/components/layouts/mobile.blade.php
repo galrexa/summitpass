@@ -36,8 +36,8 @@
     @else
     <header class="mobile-header">
         @if($showBack ?? false)
-        <a href="{{ $backUrl ?? 'javascript:history.back()' }}" class="btn btn-ghost btn-icon btn-sm" style="flex-shrink:0;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <a href="{{ $backUrl ?? 'javascript:history.back()' }}" class="btn btn-ghost btn-icon btn-sm" style="flex-shrink:0;" aria-label="Kembali ke halaman sebelumnya">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="15,18 9,12 15,6"/>
             </svg>
         </a>
@@ -96,8 +96,10 @@
     <nav class="mobile-bottom-nav">
         {{-- Tab 1: Jelajahi --}}
         <a href="{{ route('pendaki.explore') }}"
-           class="mobile-nav-item {{ request()->routeIs('pendaki.explore') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.explore') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+           class="mobile-nav-item {{ request()->routeIs('pendaki.explore') ? 'active' : '' }}"
+           aria-label="Jelajahi gunung"
+           aria-current="{{ request()->routeIs('pendaki.explore') ? 'page' : 'false' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.explore') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M3 20l5-9 4 6 3-4 6 7H3z"/>
             </svg>
             <span>Jelajahi</span>
@@ -105,8 +107,10 @@
 
         {{-- Tab 2: Booking --}}
         <a href="{{ route('pendaki.bookings') }}"
-           class="mobile-nav-item {{ request()->routeIs('pendaki.bookings*') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.bookings*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+           class="mobile-nav-item {{ request()->routeIs('pendaki.bookings*') ? 'active' : '' }}"
+           aria-label="Booking saya"
+           aria-current="{{ request()->routeIs('pendaki.bookings*') ? 'page' : 'false' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.bookings*') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14,2 14,8 20,8"/>
                 <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -117,7 +121,9 @@
         {{-- Tab 3: QR Pass (center FAB) --}}
         <a href="{{ route('pendaki.my-pass') }}"
            class="mobile-nav-item {{ request()->routeIs('pendaki.my-pass') ? 'active' : '' }}"
-           style="position:relative;">
+           style="position:relative;"
+           aria-label="QR Pass saya"
+           aria-current="{{ request()->routeIs('pendaki.my-pass') ? 'page' : 'false' }}">
             <div style="
                 width:52px; height:52px;
                 background: {{ request()->routeIs('pendaki.my-pass') ? 'linear-gradient(135deg,#14532d,#164e63)' : 'linear-gradient(135deg, var(--color-forest-700), var(--color-lake-600))' }};
@@ -126,7 +132,7 @@
                 box-shadow: 0 4px 16px rgba(45,106,79,0.35);
                 margin-top: -16px;
             ">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="3" y="3" width="7" height="7" rx="1"/>
                     <rect x="14" y="3" width="7" height="7" rx="1"/>
                     <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -138,8 +144,10 @@
 
         {{-- Tab 4: Jejak --}}
         <a href="{{ route('pendaki.jejak-summit') }}"
-           class="mobile-nav-item {{ request()->routeIs('pendaki.jejak-summit') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.jejak-summit') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+           class="mobile-nav-item {{ request()->routeIs('pendaki.jejak-summit') ? 'active' : '' }}"
+           aria-label="Jejak summit saya"
+           aria-current="{{ request()->routeIs('pendaki.jejak-summit') ? 'page' : 'false' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.jejak-summit') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="12" cy="8" r="6"/>
                 <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
             </svg>
@@ -148,8 +156,10 @@
 
         {{-- Tab 5: Profil --}}
         <a href="{{ route('pendaki.profile') }}"
-           class="mobile-nav-item {{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? 'active' : '' }}">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round">
+           class="mobile-nav-item {{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? 'active' : '' }}"
+           aria-label="Profil saya"
+           aria-current="{{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? 'page' : 'false' }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ request()->routeIs('pendaki.profile') || request()->routeIs('pendaki.settings') ? '2.25' : '1.75' }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
             </svg>

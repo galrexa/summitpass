@@ -94,6 +94,31 @@ class BookingController extends Controller
                 ->withErrors(['end_date' => "Maksimal {$reg->max_hiking_days} hari pendakian."]);
         }
 
+        // ── Validasi Pengalaman Pendaki ───────────────────────────────────
+        // Cek apakah user memenuhi syarat min_elevation_experience
+        $mountain = $trail->mountain;
+        
+        if ($reg && $reg->min_elevation_experience) {
+            $userExperience = $user->highestSummitMdpl();
+            
+            if ($userExperience < $reg->min_elevation_experience) {
+                // User tidak memenuhi syarat - berikan rekomendasi alternatif
+                $recommendations = $user->getRecommendedMountains(3);
+                
+                return back()->withInput()
+                    ->withErrors([
+                        'mountain_id' => sprintf(
+                            'Anda memerlukan pengalaman mendaki gunung minimal %d MDPL untuk mendaki %s. ' .
+                            'Pengalaman tertinggi Anda saat ini: %d MDPL.',
+                            $reg->min_elevation_experience,
+                            $mountain->name,
+                            $userExperience
+                        )
+                    ])
+                    ->with('recommended_mountains', $recommendations);
+            }
+        }
+
         // Hitung harga
         $trailFee = $reg ? ($reg->base_price ?? 0) : 0;
         $guidePrice = ($validated['guide_requested'] ?? false) && $reg

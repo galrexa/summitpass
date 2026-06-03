@@ -20,8 +20,14 @@
         </div>
         <a href="{{ route('pendaki.bookings.create') }}"
            class="btn btn-primary btn-sm"
-           @if(!Auth::user()->nik && !Auth::user()->passport_number) style="opacity:.5;pointer-events:none;" @endif>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+           @if(!Auth::user()->nik && !Auth::user()->passport_number)
+               style="opacity:.5;pointer-events:none;"
+               aria-disabled="true"
+               tabindex="-1"
+           @else
+               aria-label="Buat booking baru"
+           @endif>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Booking Baru
         </a>
     </div>
@@ -52,10 +58,12 @@
             $s = $statusMap[$booking->status] ?? ['label'=>$booking->status,'class'=>'badge-gray'];
         @endphp
         <a href="{{ route('pendaki.bookings.show', $booking->id) }}"
-           style="display:block;text-decoration:none;">
+           style="display:block;text-decoration:none;"
+           aria-label="Lihat detail booking {{ $booking->mountain->name ?? 'gunung' }} pada {{ $booking->start_date->format('d M Y') }}">
             <div class="card" style="transition:box-shadow .15s;cursor:pointer;"
                  onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
-                 onmouseout="this.style.boxShadow=''">
+                 onmouseout="this.style.boxShadow=''"
+                 role="article">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
                     <div style="flex:1;min-width:200px;">
                         <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.375rem;">

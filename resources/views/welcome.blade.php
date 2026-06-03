@@ -1467,36 +1467,69 @@
             <h2 style="font-family:'Instrument Serif',serif;font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.15;letter-spacing:-0.02em;color:var(--ink);margin-bottom:1rem;">
                 Coba SummitPass dengan<br><em style="color:var(--green);font-style:italic;">akun demo yang tersedia.</em>
             </h2>
-            <p style="font-size:0.95rem;color:var(--stone);line-height:1.75;max-width:600px;margin:0 auto;">
-                Gunakan salah satu akun demo berikut untuk menjelajahi fitur lengkap SummitPass dari berbagai perspektif pengguna.
+            <p style="font-size:0.95rem;color:var(--stone);line-height:1.75;max-width:700px;margin:0 auto;">
+                Gunakan akun demo berikut untuk menjelajahi fitur SummitPass. Coba <strong style="color:#dc2626;">Pendaki Pemula</strong> untuk melihat validasi pengalaman, atau <strong style="color:var(--green);">Pendaki Expert</strong> untuk akses penuh.
             </p>
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;" class="reveal">
-            {{-- Pendaki --}}
-            <div style="border:2px solid var(--green-m);border-radius:var(--r-lg);padding:2rem 1.75rem;background:var(--green-l);position:relative;overflow:hidden;">
-                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:var(--green);opacity:0.08;border-radius:50%;"></div>
+            {{-- Pendaki Pemula --}}
+            <div style="border:2px solid #fecaca;border-radius:var(--r-lg);padding:2rem 1.75rem;background:#fee2e2;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:#dc2626;opacity:0.08;border-radius:50%;"></div>
                 <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:1.5rem;position:relative;">
-                    <div style="width:48px;height:48px;background:var(--green);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;">
-                        P
+                    <div style="width:48px;height:48px;background:#dc2626;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;flex-shrink:0;">
+                        🔒
                     </div>
                     <div>
-                        <div style="font-weight:700;color:var(--green-d);font-size:1.05rem;">Pendaki</div>
-                        <div style="font-size:0.78rem;color:var(--stone);">Role: Hiker</div>
+                        <div style="font-weight:700;color:#7f1d1d;font-size:1.05rem;">Pendaki Pemula</div>
+                        <div style="font-size:0.78rem;color:var(--stone);">Andi • 0 MDPL</div>
                     </div>
                 </div>
                 <div style="background:white;padding:1.25rem;border-radius:var(--r-md);margin-bottom:1.25rem;position:relative;">
                     <div style="margin-bottom:0.875rem;">
                         <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">EMAIL</div>
-                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">budi@example.com</code>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pemula@example.com</code>
                     </div>
                     <div>
                         <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">PASSWORD</div>
-                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pendaki123</code>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pemula123</code>
                     </div>
                 </div>
-                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;">
-                    <strong style="color:var(--ink);">Akses:</strong> Booking pendakian, QR Pass digital, Trekking log, Jejak Summit, Family tracking link
+                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;margin-bottom:1rem;">
+                    <strong style="color:var(--ink);">Demo:</strong> Belum pernah mendaki, tidak eligible untuk Gunung Semeru (Grade IV, butuh 2500 MDPL)
+                </div>
+                <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.75rem;font-size:0.75rem;color:#991b1b;line-height:1.5;">
+                    <strong>🔒 Ditolak:</strong> Sistem akan menampilkan peringatan dan rekomendasi gunung yang sesuai
+                </div>
+            </div>
+            
+            {{-- Pendaki Expert --}}
+            <div style="border:2px solid var(--green-m);border-radius:var(--r-lg);padding:2rem 1.75rem;background:var(--green-l);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:var(--green);opacity:0.08;border-radius:50%;"></div>
+                <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:1.5rem;position:relative;">
+                    <div style="width:48px;height:48px;background:var(--green);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;flex-shrink:0;">
+                        ✓
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:var(--green-d);font-size:1.05rem;">Pendaki Expert</div>
+                        <div style="font-size:0.78rem;color:var(--stone);">Siti • 2958 MDPL</div>
+                    </div>
+                </div>
+                <div style="background:white;padding:1.25rem;border-radius:var(--r-md);margin-bottom:1.25rem;position:relative;">
+                    <div style="margin-bottom:0.875rem;">
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">EMAIL</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">expert@example.com</code>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">PASSWORD</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">expert123</code>
+                    </div>
+                </div>
+                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;margin-bottom:1rem;">
+                    <strong style="color:var(--ink);">Demo:</strong> Sudah pernah summit Rinjani (2958m), eligible untuk semua gunung termasuk Semeru
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.75rem;font-size:0.75rem;color:#14532d;line-height:1.5;">
+                    <strong>✓ Berhasil:</strong> Dapat booking Semeru dan gunung lainnya tanpa hambatan
                 </div>
             </div>
 

@@ -3,9 +3,10 @@
 
     <x-slot:head>
     <style>
-        .filter-strip { display:flex; gap:.5rem; padding:.75rem 1rem 0; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+        .filter-strip { display:flex; gap:.5rem; padding:.75rem 1rem 0; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; position:relative; }
         .filter-strip::-webkit-scrollbar { display:none; }
-        .filter-pill { flex-shrink:0; padding:.35rem .875rem; border-radius:20px; font-size:.78rem; font-weight:600; border:1.5px solid var(--color-border); background:white; color:var(--color-text-muted); cursor:pointer; transition:all .15s; white-space:nowrap; }
+        .filter-strip::after { content:''; position:absolute; right:0; top:0; bottom:0; width:40px; background:linear-gradient(to left, var(--color-surface-alt), transparent); pointer-events:none; }
+        .filter-pill { flex-shrink:0; padding:.5rem 1rem; border-radius:20px; font-size:.8rem; font-weight:600; border:1.5px solid var(--color-border); background:white; color:var(--color-text-muted); cursor:pointer; transition:all .15s; white-space:nowrap; min-height:44px; display:flex; align-items:center; }
         .filter-pill.active { background:var(--color-forest-100); color:var(--color-forest-800); border-color:var(--color-forest-300); }
         .mountain-grid { display:grid; grid-template-columns:1fr 1fr; gap:.875rem; padding:1rem; }
         @media(min-width:640px) { .mountain-grid { grid-template-columns:repeat(3,1fr); } }
@@ -42,6 +43,90 @@
             </div>
         </div>
 
+        {{-- Rekomendasi Untuk Anda --}}
+        <div style="padding:1rem 1rem 0;" x-data="{ recommendations: [], userExp: 0, loading: true }">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+                <h2 style="font-size:1rem;font-weight:700;color:var(--color-text);">
+                    🎯 Rekomendasi Untuk Anda
+                </h2>
+                <span x-show="userExp > 0" x-text="`${userExp} MDPL`" style="font-size:.75rem;color:var(--color-text-muted);font-weight:600;"></span>
+            </div>
+            
+            <div x-show="loading" style="text-align:center;padding:2rem 0;">
+                <div style="width:2rem;height:2rem;border:3px solid #e5e7eb;border-top-color:var(--color-forest-600);border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>
+                <p style="margin-top:.5rem;font-size:.875rem;color:var(--color-text-muted);">Memuat rekomendasi...</p>
+            </div>
+            
+            <div x-show="!loading && recommendations.length === 0" style="text-align:center;padding:2rem 0;">
+                <p style="font-size:.875rem;color:var(--color-text-muted);">🎉 Selamat! Anda sudah eligible untuk semua gunung</p>
+            </div>
+            
+            <div x-show="!loading && recommendations.length > 0" style="display:grid;gap:.75rem;">
+                <template x-for="rec in recommendations" :key="rec.id">
+                    <a :href="`/my/bookings/create?mountain_id=${rec.id}`"
+                       style="display:block;background:white;border-radius:12px;border:1.5px solid var(--color-border);padding:.875rem;transition:all .15s;text-decoration:none;"
+                       @mousedown="$el.style.transform='scale(0.98)'"
+                       @mouseup="$el.style.transform='scale(1)'"
+                       @mouseleave="$el.style.transform='scale(1)'">
+                        <div style="display:flex;gap:.75rem;align-items:start;">
+                            <div style="width:60px;height:60px;border-radius:8px;background:linear-gradient(135deg,var(--color-forest-100),var(--color-forest-200));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">
+                                🏔️
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.25rem;">
+                                    <h3 x-text="rec.name" style="font-size:.9375rem;font-weight:700;color:var(--color-text);"></h3>
+                                    <span x-text="`Grade ${rec.grade}`"
+                                          :style="`padding:.125rem .5rem;font-size:.625rem;font-weight:700;border-radius:12px;
+                                                   ${rec.grade === 'I' || rec.grade === 'II' ? 'background:#dcfce7;color:#166534' :
+                                                     rec.grade === 'III' ? 'background:#fef3c7;color:#92400e' :
+                                                     'background:#fee2e2;color:#991b1b'}`">
+                                    </span>
+                                </div>
+                                <p x-text="`${rec.location} • ${rec.height_mdpl} MDPL`" style="font-size:.8125rem;color:var(--color-text-muted);margin-bottom:.375rem;"></p>
+                                <p x-show="rec.required_experience"
+                                   x-text="`✓ Anda memenuhi syarat (min. ${rec.required_experience} MDPL)`"
+                                   style="font-size:.75rem;color:var(--color-forest-700);font-weight:600;"></p>
+                                <p x-show="!rec.required_experience"
+                                   style="font-size:.75rem;color:var(--color-text-muted);">✓ Tidak ada syarat pengalaman</p>
+                            </div>
+                            <svg style="width:1.25rem;height:1.25rem;color:var(--color-text-muted);flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
+                </template>
+            </div>
+            
+            <script>
+                // Fetch rekomendasi gunung saat page load
+                fetch('/api/mountains/recommendations?limit=3')
+                    .then(res => res.json())
+                    .then(data => {
+                        Alpine.store('recommendations', {
+                            list: data.recommendations,
+                            userExp: data.user_experience
+                        });
+                        
+                        // Update component data
+                        document.querySelectorAll('[x-data*="recommendations"]').forEach(el => {
+                            if (el.__x) {
+                                el.__x.$data.recommendations = data.recommendations;
+                                el.__x.$data.userExp = data.user_experience;
+                                el.__x.$data.loading = false;
+                            }
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Error loading recommendations:', err);
+                        document.querySelectorAll('[x-data*="recommendations"]').forEach(el => {
+                            if (el.__x) {
+                                el.__x.$data.loading = false;
+                            }
+                        });
+                    });
+            </script>
+        </div>
+
         {{-- Filter strip --}}
         <div class="filter-strip">
             @php
@@ -60,6 +145,8 @@
             <button
                 @click="filter = '{{ $key }}'"
                 :class="filter === '{{ $key }}' ? 'filter-pill active' : 'filter-pill'"
+                :aria-pressed="filter === '{{ $key }}' ? 'true' : 'false'"
+                aria-label="Filter gunung berdasarkan {{ strtolower($label) }}"
             >{{ $label }}</button>
             @endforeach
         </div>
@@ -83,6 +170,19 @@
                                 :style="trailStatusStyle(m.trail_status ?? 'open')"
                                 x-text="trailStatusText(m.trail_status ?? 'open')"
                             ></span>
+                        </div>
+                        {{-- Eligibility badge --}}
+                        <div x-show="m.min_elevation_experience" style="position:absolute;bottom:.5rem;right:.5rem;">
+                            <span
+                                x-show="m.is_eligible"
+                                style="font-size:.6rem;font-weight:700;padding:.25rem .5rem;border-radius:20px;background:rgba(16,185,129,.9);color:white;box-shadow:0 2px 4px rgba(0,0,0,.1);">
+                                ✓ Eligible
+                            </span>
+                            <span
+                                x-show="!m.is_eligible"
+                                style="font-size:.6rem;font-weight:700;padding:.25rem .5rem;border-radius:20px;background:rgba(107,114,128,.9);color:white;box-shadow:0 2px 4px rgba(0,0,0,.1);">
+                                🔒 Butuh Pengalaman
+                            </span>
                         </div>
                     </div>
 
@@ -146,16 +246,40 @@
         >
             <div class="drag-handle"></div>
 
-            {{-- Loading --}}
+            {{-- Loading with skeleton --}}
             <template x-if="drawerLoading">
-                <div style="padding:3rem;text-align:center;color:#9ca3af;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;margin:0 auto .75rem;display:block;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                    Memuat informasi gunung…
+                <div style="padding:1.5rem;" role="status" aria-live="polite" aria-label="Memuat informasi gunung">
+                    {{-- Skeleton header --}}
+                    <div style="margin-bottom:1.5rem;">
+                        <div class="skeleton" style="height:24px;width:60%;margin-bottom:0.5rem;"></div>
+                        <div class="skeleton" style="height:16px;width:40%;"></div>
+                    </div>
+                    {{-- Skeleton stats --}}
+                    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
+                        <div class="skeleton" style="flex:1;height:80px;border-radius:8px;"></div>
+                        <div class="skeleton" style="flex:1;height:80px;border-radius:8px;"></div>
+                        <div class="skeleton" style="flex:1;height:80px;border-radius:8px;"></div>
+                    </div>
+                    {{-- Skeleton content --}}
+                    <div class="skeleton" style="height:100px;width:100%;margin-bottom:1rem;border-radius:8px;"></div>
+                    <div class="skeleton" style="height:60px;width:100%;border-radius:8px;"></div>
+                </div>
+            </template>
+
+            {{-- Error state --}}
+            <template x-if="!drawerLoading && drawerError">
+                <div style="padding:3rem 1.5rem;text-align:center;">
+                    <div style="width:56px;height:56px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <h3 style="font-size:.95rem;font-weight:600;color:var(--color-text);margin-bottom:.5rem;">Gagal Memuat Data</h3>
+                    <p style="font-size:.825rem;color:var(--color-text-muted);margin-bottom:1.5rem;" x-text="drawerError"></p>
+                    <button @click="closeDrawer()" class="btn btn-outline btn-sm">Tutup</button>
                 </div>
             </template>
 
             {{-- Drawer content --}}
-            <template x-if="!drawerLoading && mountain">
+            <template x-if="!drawerLoading && !drawerError && mountain">
                 <div style="padding:1.25rem 1.25rem 2rem;">
 
                     {{-- Name + grade --}}
@@ -281,6 +405,7 @@
             search: '',
             drawerOpen: false,
             drawerLoading: false,
+            drawerError: null,
             mountain: null,
             weather: null,
             drawerSlot: null,
@@ -378,6 +503,7 @@
             async openDrawer(id) {
                 this.drawerOpen   = true;
                 this.drawerLoading = true;
+                this.drawerError  = null;
                 this.mountain     = null;
                 this.weather      = null;
                 this.drawerSlot   = null;
@@ -387,13 +513,18 @@
                         fetch(`/api/mountains/${id}/detail`),
                         fetch(`/api/mountains/${id}/weather`),
                     ]);
+                    
+                    if (!mRes.ok) throw new Error('Gagal memuat data gunung');
+                    
                     const mData = await mRes.json();
-                    const wData = await wRes.json();
+                    const wData = wRes.ok ? await wRes.json() : { forecast: [] };
+                    
                     this.mountain   = mData.mountain;
                     this.drawerSlot = mData.slot_remaining ?? null;
                     this.weather    = wData.forecast ?? [];
                 } catch(e) {
-                    this.drawerOpen = false;
+                    this.drawerError = e.message || 'Terjadi kesalahan saat memuat data';
+                    console.error('Error loading mountain details:', e);
                 } finally {
                     this.drawerLoading = false;
                 }

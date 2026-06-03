@@ -3,6 +3,16 @@
 
     <x-slot:head>
         <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        <style>
+            .qr-brightness-boost {
+                filter: brightness(1.2) contrast(1.1);
+            }
+            @media (prefers-color-scheme: dark) {
+                .qr-brightness-boost {
+                    filter: brightness(1.4) contrast(1.2);
+                }
+            }
+        </style>
     </x-slot:head>
 
     <div style="max-width:460px;">
@@ -66,8 +76,11 @@
                 <div style="flex-shrink:0;">
                     @if($qrPass)
                     <div id="qr-{{ $qrPass->id }}"
-                         style="width:160px;height:160px;background:#f9fafb;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;"
-                         data-token="{{ $qrPass->qr_token }}">
+                         class="qr-brightness-boost"
+                         style="width:180px;height:180px;background:#ffffff;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid #e5e7eb;"
+                         data-token="{{ $qrPass->qr_token }}"
+                         role="img"
+                         aria-label="QR Code untuk {{ $participant->name }}">
                     </div>
                     @else
                     <div style="width:160px;height:160px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:.75rem;text-align:center;padding:.5rem;">
@@ -124,14 +137,19 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-token]').forEach(function (el) {
-            new QRCode(el, {
-                text: el.dataset.token,
-                width: 160,
-                height: 160,
-                colorDark: '#1a2e1a',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.M,
-            });
+            try {
+                new QRCode(el, {
+                    text: el.dataset.token,
+                    width: 180,
+                    height: 180,
+                    colorDark: '#0a1f0a',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H,
+                });
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                el.innerHTML = '<div style="color:#dc2626;font-size:0.75rem;text-align:center;padding:1rem;">Gagal membuat QR code</div>';
+            }
         });
     });
     </script>

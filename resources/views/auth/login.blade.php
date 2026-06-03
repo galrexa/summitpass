@@ -358,22 +358,41 @@
                 
                 {{-- Pills Buttons --}}
                 <div style="display:flex;flex-wrap:wrap;gap:0.625rem;">
-                    {{-- Pendaki Button --}}
+                    {{-- Pendaki Pemula Button --}}
                     <button
-                        @click="selectedRole = 'pendaki'; demoEmail = 'budi@example.com'; demoPassword = 'pendaki123';"
+                        @click="selectedRole = 'pemula'; demoEmail = 'pemula@example.com'; demoPassword = 'pemula123';"
                         type="button"
                         style="position:relative;overflow:hidden;transition:all 0.2s;cursor:pointer;"
-                        :style="selectedRole === 'pendaki' ?
+                        :style="selectedRole === 'pemula' ?
+                            'background:linear-gradient(135deg,#dc2626,#ef4444);color:white;border:none;box-shadow:0 4px 12px rgba(220,38,38,0.3);transform:translateY(-2px);' :
+                            'background:white;color:#dc2626;border:2px solid #fecaca;box-shadow:0 2px 6px rgba(0,0,0,0.05);'"
+                    >
+                        <div style="position:relative;z-index:1;padding:0.625rem 1.25rem;display:flex;align-items:center;gap:0.625rem;">
+                            <div :style="selectedRole === 'pemula' ?
+                                'width:28px;height:28px;background:rgba(255,255,255,0.25);backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;' :
+                                'width:28px;height:28px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;'">
+                                <span style="font-size:0.7rem;font-weight:800;" :style="selectedRole === 'pemula' ? 'color:white;' : 'color:#dc2626;'">🔒</span>
+                            </div>
+                            <span style="font-size:0.875rem;font-weight:700;letter-spacing:0.01em;">Pemula</span>
+                        </div>
+                    </button>
+                    
+                    {{-- Pendaki Expert Button --}}
+                    <button
+                        @click="selectedRole = 'expert'; demoEmail = 'expert@example.com'; demoPassword = 'expert123';"
+                        type="button"
+                        style="position:relative;overflow:hidden;transition:all 0.2s;cursor:pointer;"
+                        :style="selectedRole === 'expert' ?
                             'background:linear-gradient(135deg,#16a34a,#22c55e);color:white;border:none;box-shadow:0 4px 12px rgba(22,163,74,0.3);transform:translateY(-2px);' :
                             'background:white;color:#16a34a;border:2px solid #bbf7d0;box-shadow:0 2px 6px rgba(0,0,0,0.05);'"
                     >
                         <div style="position:relative;z-index:1;padding:0.625rem 1.25rem;display:flex;align-items:center;gap:0.625rem;">
-                            <div :style="selectedRole === 'pendaki' ?
+                            <div :style="selectedRole === 'expert' ?
                                 'width:28px;height:28px;background:rgba(255,255,255,0.25);backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;' :
                                 'width:28px;height:28px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;'">
-                                <span style="font-size:0.75rem;font-weight:800;" :style="selectedRole === 'pendaki' ? 'color:white;' : 'color:#16a34a;'">P</span>
+                                <span style="font-size:0.7rem;font-weight:800;" :style="selectedRole === 'expert' ? 'color:white;' : 'color:#16a34a;'">✓</span>
                             </div>
-                            <span style="font-size:0.875rem;font-weight:700;letter-spacing:0.01em;">Pendaki</span>
+                            <span style="font-size:0.875rem;font-weight:700;letter-spacing:0.01em;">Expert</span>
                         </div>
                     </button>
                     
@@ -420,14 +439,22 @@
                 <div
                     x-show="selectedRole !== null"
                     x-transition
-                    style="margin-top:1rem;padding:0.875rem;background:white;border-radius:10px;display:flex;align-items:center;gap:0.625rem;border:1px solid #e5e5e5;"
+                    style="margin-top:1rem;padding:0.875rem;background:white;border-radius:10px;display:flex;align-items:start;gap:0.625rem;border:1px solid #e5e5e5;"
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:0.125rem;">
                         <polyline points="20 6 9 17 4 12"/>
                     </svg>
-                    <span style="font-size:0.8rem;color:#14532d;font-weight:600;">
-                        Kredensial <span x-text="selectedRole === 'pendaki' ? 'Pendaki' : selectedRole === 'pengelola' ? 'Pengelola' : 'Admin'"></span> berhasil diisi ke form
-                    </span>
+                    <div style="flex:1;">
+                        <span style="font-size:0.8rem;color:#14532d;font-weight:600;display:block;margin-bottom:0.25rem;">
+                            Kredensial <span x-text="selectedRole === 'pemula' ? 'Pendaki Pemula' : selectedRole === 'expert' ? 'Pendaki Expert' : selectedRole === 'pengelola' ? 'Pengelola' : 'Admin'"></span> berhasil diisi ke form
+                        </span>
+                        <span x-show="selectedRole === 'pemula'" style="font-size:0.72rem;color:#dc2626;display:block;">
+                            🔒 Belum eligible untuk Gunung Semeru (Grade IV)
+                        </span>
+                        <span x-show="selectedRole === 'expert'" style="font-size:0.72rem;color:#16a34a;display:block;">
+                            ✓ Eligible untuk semua gunung termasuk Semeru
+                        </span>
+                    </div>
                 </div>
             </div>
 

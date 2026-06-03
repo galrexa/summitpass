@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FamilyTrackingController;
+use App\Http\Controllers\MountainController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pendaki\PendakiController;
 use App\Http\Controllers\Pendaki\BookingController as PendakiBookingController;
@@ -60,9 +61,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings',           [PendakiController::class, 'settings'])->name('settings');
     });
 
-    Route::get('/api/mountains/{mountainId}/trails',  [PendakiBookingController::class, 'trails'])->name('api.mountains.trails');
-    Route::get('/api/mountains/{id}/detail',          [PendakiController::class, 'mountainDetail'])->name('api.mountain.detail');
-    Route::get('/api/mountains/{id}/weather',         [PendakiController::class, 'mountainWeather'])->name('api.mountain.weather');
+    Route::get('/api/mountains/{mountainId}/trails',       [PendakiBookingController::class, 'trails'])->name('api.mountains.trails');
+    Route::get('/api/mountains/{id}/detail',               [PendakiController::class, 'mountainDetail'])->name('api.mountain.detail');
+    Route::get('/api/mountains/{id}/weather',              [PendakiController::class, 'mountainWeather'])->name('api.mountain.weather');
+    
+    // API: Rekomendasi & Eligibility Check
+    Route::get('/api/mountains/recommendations',           [MountainController::class, 'recommendations'])->name('api.mountains.recommendations');
+    Route::get('/api/mountains/{id}/check-eligibility',    [MountainController::class, 'checkEligibility'])->name('api.mountains.check-eligibility');
 });
 
 // Admin & Pengelola

@@ -19,11 +19,19 @@ class PendakiController extends Controller
 
     public function explore()
     {
+        $user = Auth::user();
+        
         $mountains = Mountain::active()
             ->withQuotaSummary()
             ->with(['regulation', 'trails' => fn($q) => $q->active()])
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($mountain) use ($user) {
+                // Tambahkan data eligibility untuk setiap gunung
+                $mountain->is_eligible = $user->isEligibleForMountain($mountain);
+                $mountain->min_elevation_experience = $mountain->regulation?->min_elevation_experience;
+                return $mountain;
+            });
 
         return view('pendaki.explore', compact('mountains'));
     }

@@ -67,6 +67,9 @@
                         type="button"
                         onclick="toggleAccordion('{{ $accordionId }}')"
                         style="width:100%;display:flex;align-items:center;gap:.875rem;padding:.875rem 1rem;background:{{ $hasAnomaly ? '#fef2f2' : '#f9fafb' }};border:none;cursor:pointer;text-align:left;"
+                        aria-expanded="false"
+                        aria-controls="{{ $accordionId }}"
+                        aria-label="Lihat detail log pendakian {{ $mountain?->name ?? 'gunung' }}"
                     >
                         {{-- Mountain icon --}}
                         <div style="width:40px;height:40px;border-radius:8px;background:var(--color-forest-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -157,10 +160,16 @@
     <script>
     function toggleAccordion(id) {
         const body    = document.getElementById(id);
+        const button  = document.querySelector(`[aria-controls="${id}"]`);
         const chevron = document.getElementById(id + '-chevron');
         const isOpen  = body.style.display !== 'none';
-        body.style.display    = isOpen ? 'none' : 'block';
+        
+        body.style.display = isOpen ? 'none' : 'block';
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+        
+        if (button) {
+            button.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        }
     }
     </script>
 
