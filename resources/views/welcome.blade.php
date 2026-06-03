@@ -659,13 +659,13 @@
         <a href="#cara-kerja" class="nav-link">Cara kerja</a>
         <a href="#untuk-pendaki" class="nav-link">Untuk pendaki</a>
         <a href="#untuk-pengelola" class="nav-link">Untuk pengelola</a>
-        <a href="#keamanan" class="nav-link">Keamanan</a>
+        <a href="#untuk-keluarga" class="nav-link">Untuk keluarga</a>
     </div>
     @auth
         <a href="{{ route('dashboard') }}" class="btn-nav-login" style="margin-right:.5rem;">Dashboard</a>
     @else
         <a href="{{ route('login') }}" class="btn-nav-login" style="margin-right:.5rem;">Masuk</a>
-        <a href="{{ route('register') }}" class="btn-nav-cta">Daftar gratis</a>
+        <a href="{{ route('login') }}" class="btn-nav-cta">Lihat Demo</a>
     @endauth
 </nav>
 
@@ -685,9 +685,9 @@
             SummitPass mencatat pergerakan pendaki di <strong>setiap pos</strong>, naik dan turun. Bukan sekadar tiket masuk — ini jejak digital yang menjadi landasan operasi SAR saat menit-menit pertama paling kritis.
         </p>
         <div class="hero-ctas">
-            <a href="{{ route('register') }}" class="btn-primary">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Daftar sekarang
+            <a href="{{ route('login') }}" class="btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Coba Demo Sekarang
             </a>
             <a href="#cara-kerja" class="btn-ghost">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -1166,6 +1166,94 @@
             </div>
         </div>
     </div>
+
+{{-- ===================================================
+     SECTION: UNTUK KELUARGA
+================================================== --}}
+<section id="untuk-keluarga" class="role-section" style="background:linear-gradient(180deg, #fef3c7 0%, var(--stone-xl) 100%);">
+    <div class="role-inner">
+        <div class="role-header reveal">
+            <div>
+                <div class="role-label" style="background:#fef3c7;border:1px solid #fde047;color:#92400e;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Untuk Keluarga
+                </div>
+                <h2 class="role-title">Pantau orang tersayang<br>tanpa harus<br><em>install aplikasi.</em></h2>
+                <p class="role-sub">Cukup dengan link tracking yang dibagikan pendaki, keluarga bisa memantau posisi real-time, checkpoint terakhir, dan estimasi waktu perjalanan — tanpa perlu registrasi atau download aplikasi.</p>
+                <ul class="role-checklist">
+                    <li>
+                        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>
+                        Tracking real-time tanpa login atau install app — cukup buka link
+                    </li>
+                    <li>
+                        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>
+                        Lihat posisi terakhir & semua checkpoint yang sudah dilewati
+                    </li>
+                    <li>
+                        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>
+                        Estimasi waktu tempuh & status keamanan pendaki
+                    </li>
+                    <li>
+                        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>
+                        Update otomatis setiap kali pendaki scan di pos checkpoint
+                    </li>
+                    <li>
+                        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></span>
+                        Akses 24/7 dari browser smartphone atau desktop — tidak perlu install
+                    </li>
+                </ul>
+            </div>
+            <div>
+                {{-- Family Tracking Visual --}}
+                <div class="carousel-wrap">
+                    <div class="carousel-viewport">
+                        <div class="carousel-slide">
+                            <div class="screenshot-placeholder" style="background:linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%);">
+                                <div class="ph-icon" style="background:rgba(251,191,36,.15);border:1.5px dashed #f59e0b;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                </div>
+                                <div class="ph-label" style="color:#92400e;">
+                                    <strong>Family Tracking</strong><br>
+                                    Pantau posisi pendaki real-time
+                                </div>
+                                <div class="ph-upload-hint" style="background:rgba(251,191,36,.12);color:#92400e;border:1px dashed #fbbf24;">
+                                    Tanpa Login • Tanpa Install App
+                                </div>
+                            </div>
+                            <div class="slide-caption">
+                                <div>
+                                    <div class="slide-caption-text">Family Tracking Link</div>
+                                    <div class="slide-caption-sub">Bagikan link, keluarga bisa pantau langsung</div>
+                                </div>
+                                <span class="slide-badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde047;">Keluarga</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Info Box --}}
+                <div style="margin-top:1.5rem;background:rgba(254,243,199,.3);border:1px solid #fde047;border-radius:var(--r-md);padding:1.25rem 1.5rem;">
+                    <div style="display:flex;align-items:flex-start;gap:.75rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <div>
+                            <div style="font-size:.85rem;font-weight:600;color:#92400e;margin-bottom:.35rem;">Cara Menggunakan</div>
+                            <div style="font-size:.8rem;color:#78716c;line-height:1.6;">
+                                Setiap pendaki mendapat <strong>Family Tracking Link</strong> unik setelah booking. Bagikan link tersebut ke keluarga via WhatsApp, SMS, atau email. Keluarga cukup buka link di browser untuk melihat posisi real-time.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 </section>
 
 {{-- Features --}}
@@ -1366,18 +1454,179 @@
     </div>
 </div>
 
+{{-- ===================================================
+     SECTION: AKUN DEMO
+================================================== --}}
+<section id="demo-accounts" style="padding:5rem 2rem;background:white;">
+    <div style="max-width:1000px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:3rem;" class="reveal">
+            <div style="display:inline-flex;align-items:center;gap:0.5rem;background:#fef3c7;border:1px solid #fde047;border-radius:20px;padding:0.35rem 1rem;margin-bottom:1rem;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span style="font-size:0.72rem;font-weight:700;color:#92400e;letter-spacing:0.04em;text-transform:uppercase;">Mode Prototipe Demo</span>
+            </div>
+            <h2 style="font-family:'Instrument Serif',serif;font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.15;letter-spacing:-0.02em;color:var(--ink);margin-bottom:1rem;">
+                Coba SummitPass dengan<br><em style="color:var(--green);font-style:italic;">akun demo yang tersedia.</em>
+            </h2>
+            <p style="font-size:0.95rem;color:var(--stone);line-height:1.75;max-width:600px;margin:0 auto;">
+                Gunakan salah satu akun demo berikut untuk menjelajahi fitur lengkap SummitPass dari berbagai perspektif pengguna.
+            </p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;" class="reveal">
+            {{-- Pendaki --}}
+            <div style="border:2px solid var(--green-m);border-radius:var(--r-lg);padding:2rem 1.75rem;background:var(--green-l);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:var(--green);opacity:0.08;border-radius:50%;"></div>
+                <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:1.5rem;position:relative;">
+                    <div style="width:48px;height:48px;background:var(--green);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;">
+                        P
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:var(--green-d);font-size:1.05rem;">Pendaki</div>
+                        <div style="font-size:0.78rem;color:var(--stone);">Role: Hiker</div>
+                    </div>
+                </div>
+                <div style="background:white;padding:1.25rem;border-radius:var(--r-md);margin-bottom:1.25rem;position:relative;">
+                    <div style="margin-bottom:0.875rem;">
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">EMAIL</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">budi@example.com</code>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">PASSWORD</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pendaki123</code>
+                    </div>
+                </div>
+                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;">
+                    <strong style="color:var(--ink);">Akses:</strong> Booking pendakian, QR Pass digital, Trekking log, Jejak Summit, Family tracking link
+                </div>
+            </div>
+
+            {{-- Pengelola TN --}}
+            <div style="border:2px solid #fde047;border-radius:var(--r-lg);padding:2rem 1.75rem;background:#fef3c7;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:#f59e0b;opacity:0.08;border-radius:50%;"></div>
+                <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:1.5rem;position:relative;">
+                    <div style="width:48px;height:48px;background:#f59e0b;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.95rem;flex-shrink:0;">
+                        TN
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:#92400e;font-size:1.05rem;">Pengelola TN</div>
+                        <div style="font-size:0.78rem;color:var(--stone);">Role: Manager</div>
+                    </div>
+                </div>
+                <div style="background:white;padding:1.25rem;border-radius:var(--r-md);margin-bottom:1.25rem;position:relative;">
+                    <div style="margin-bottom:0.875rem;">
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">EMAIL</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pengelola@tngr.id</code>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">PASSWORD</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">pengelola123</code>
+                    </div>
+                </div>
+                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;">
+                    <strong style="color:var(--ink);">Akses:</strong> Dashboard monitoring, Trekking map real-time, Manajemen booking, Konfirmasi pembayaran, Anomaly detection
+                </div>
+            </div>
+
+            {{-- Admin --}}
+            <div style="border:2px solid #e5e5e5;border-radius:var(--r-lg);padding:2rem 1.75rem;background:var(--stone-l);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:var(--ink);opacity:0.05;border-radius:50%;"></div>
+                <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:1.5rem;position:relative;">
+                    <div style="width:48px;height:48px;background:var(--ink);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;">
+                        A
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:var(--ink);font-size:1.05rem;">Admin</div>
+                        <div style="font-size:0.78rem;color:var(--stone);">Role: Super Admin</div>
+                    </div>
+                </div>
+                <div style="background:white;padding:1.25rem;border-radius:var(--r-md);margin-bottom:1.25rem;position:relative;">
+                    <div style="margin-bottom:0.875rem;">
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">EMAIL</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">admin@summitpass.id</code>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem;font-weight:600;color:var(--stone);margin-bottom:0.35rem;">PASSWORD</div>
+                        <code style="background:var(--stone-l);padding:0.5rem 0.75rem;border-radius:6px;font-size:0.85rem;display:block;color:var(--ink);font-weight:600;">admin123456</code>
+                    </div>
+                </div>
+                <div style="font-size:0.82rem;color:var(--stone);line-height:1.6;position:relative;">
+                    <strong style="color:var(--ink);">Akses:</strong> Full control, Manajemen gunung & jalur, User management, System settings, Semua fitur admin
+                </div>
+            </div>
+        </div>
+
+        {{-- Demo Family Tracking --}}
+        <div style="margin-top:2.5rem;max-width:700px;margin-left:auto;margin-right:auto;" class="reveal">
+            <div style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:2px solid var(--green-m);border-radius:var(--r-lg);padding:2rem;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:var(--green);opacity:0.06;border-radius:50%;"></div>
+                <div style="position:relative;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
+                        <div style="width:44px;height:44px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(22,163,74,0.2);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size:1.15rem;font-weight:700;color:var(--green-d);letter-spacing:-0.01em;">Demo Family Tracking</div>
+                            <div style="font-size:0.8rem;color:var(--stone);margin-top:0.15rem;">Lihat monitoring real-time tanpa login</div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.9rem;color:var(--stone);line-height:1.65;margin-bottom:1.5rem;">
+                        Keluarga bisa memantau perjalanan pendaki secara real-time — melihat pos terakhir yang dilewati, status pendakian, dan timeline lengkap. Tidak perlu akun atau login.
+                    </p>
+                    <a
+                        href="{{ route('public.family-tracking', 'demo-keluarga-001') }}"
+                        target="_blank"
+                        style="display:inline-flex;align-items:center;justify-content:center;gap:0.625rem;background:var(--green);color:white;border:none;border-radius:var(--r-md);padding:0.875rem 1.75rem;font-size:0.9rem;font-weight:600;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 16px rgba(22,163,74,0.25);width:100%;"
+                        onmouseover="this.style.background='#15803d';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.35)'"
+                        onmouseout="this.style.background='var(--green)';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(22,163,74,0.25)'"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        Buka Halaman Family Tracking Demo
+                    </a>
+                    <div style="margin-top:1rem;text-align:center;">
+                        <span style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--green-d);background:white;padding:0.4rem 0.875rem;border-radius:20px;border:1px solid var(--green-m);">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            Tidak perlu login • Auto-refresh setiap 60 detik
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center;margin-top:2.5rem;" class="reveal">
+            <a href="{{ route('login') }}" style="display:inline-flex;align-items:center;justify-content:center;gap:0.625rem;background:var(--green);color:white;border:none;border-radius:var(--r-md);padding:0.875rem 2rem;font-size:0.95rem;font-weight:600;text-decoration:none;transition:background 0.15s,transform 0.1s;box-shadow:0 4px 16px rgba(22,163,74,0.25);" onmouseover="this.style.background='#15803d';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--green)';this.style.transform='translateY(0)'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Masuk dengan Akun Demo
+            </a>
+            <p style="margin-top:1rem;font-size:0.82rem;color:var(--muted);">
+                Atau lihat <a href="/docs/PANDUAN_PENGGUNAAN_SUMMITPASS.md" style="color:var(--green-d);font-weight:600;text-decoration:none;">panduan lengkap</a> untuk detail fitur
+            </p>
+        </div>
+    </div>
+</section>
+
 {{-- CTA --}}
 <div class="cta-section">
     <div class="cta-inner reveal">
         <h2 class="cta-title">Gunung tidak menunggu.<br><em style="font-style:italic;color:var(--green)">Tapi SAR butuh datamu.</em></h2>
-        <p class="cta-sub">Satu QR. Satu pendakian. Rekam jejak lengkap yang bisa membedakan antara pencarian tepat sasaran — dan pencarian yang terlambat. Gratis untuk pendaki, selalu.</p>
+        <p class="cta-sub">Satu QR. Satu pendakian. Rekam jejak lengkap yang bisa membedakan antara pencarian tepat sasaran — dan pencarian yang terlambat. Coba demo sekarang.</p>
         <div class="cta-btns">
-            <a href="{{ route('register') }}" class="btn-primary">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Daftar gratis sekarang
+            <a href="{{ route('login') }}" class="btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Coba Demo Sekarang
             </a>
-            <a href="{{ route('login') }}" class="btn-ghost" style="color:var(--ink)">
-                Saya sudah punya akun →
+            <a href="#demo-accounts" class="btn-ghost" style="color:var(--ink)">
+                Lihat Akun Demo →
             </a>
         </div>
     </div>
@@ -1387,20 +1636,52 @@
 <footer>
     <div class="footer-inner">
         <div class="footer-top">
-            <div class="footer-brand">
-                <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:28px;height:28px;object-fit:contain;">
-                SummitPass
+            <div>
+                <div class="footer-brand" style="margin-bottom:0.75rem;">
+                    <img src="{{ asset('logo.png') }}" alt="SummitPass" style="width:28px;height:28px;object-fit:contain;">
+                    SummitPass
+                </div>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);max-width:280px;line-height:1.6;">
+                    Platform digitalisasi SIMAKSI untuk keselamatan pendakian gunung di Indonesia.
+                </p>
+                <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(254,243,199,0.15);border:1px solid rgba(253,224,71,0.3);border-radius:20px;padding:0.35rem 0.875rem;margin-top:1rem;">
+                    <span style="width:7px;height:7px;border-radius:50%;background:#fde047;display:inline-block;"></span>
+                    <span style="font-size:0.7rem;font-weight:600;color:#fde047;text-transform:uppercase;letter-spacing:0.04em;">Prototipe Demo</span>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Tentang</a>
-                <a href="#" class="footer-link">Kebijakan privasi</a>
-                <a href="#" class="footer-link">Kontak</a>
-                <a href="#" class="footer-link">API</a>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2rem;">
+                <div>
+                    <div style="font-size:0.8rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:0.75rem;">Quick Links</div>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                        <a href="#cara-kerja" class="footer-link">Cara Kerja</a>
+                        <a href="#untuk-pendaki" class="footer-link">Untuk Pendaki</a>
+                        <a href="#untuk-pengelola" class="footer-link">Untuk Pengelola</a>
+                        <a href="#untuk-keluarga" class="footer-link">Untuk Keluarga</a>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:0.75rem;">Dokumentasi</div>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                        <a href="/docs/PANDUAN_PENGGUNAAN_SUMMITPASS.md" class="footer-link">Panduan Lengkap</a>
+                        <a href="#demo-accounts" class="footer-link">Akun Demo</a>
+                        <a href="{{ route('login') }}" class="footer-link">Login</a>
+                        <a href="/api/documentation" class="footer-link">API Docs</a>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:0.75rem;">Info</div>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                        <a href="#" class="footer-link">Tentang</a>
+                        <a href="#" class="footer-link">Kebijakan Privasi</a>
+                        <a href="#" class="footer-link">Kontak</a>
+                        <a href="https://github.com" class="footer-link">GitHub</a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <span>&copy; {{ date('Y') }} SummitPass. Prototipe — belum aktif secara resmi.</span>
-            <span>Dikembangkan oleh Bravopala Tech</span>
+            <span>&copy; {{ date('Y') }} SummitPass. Dibuat dengan ❤️ untuk Pendaki Indonesia.</span>
+            <span style="font-size:0.75rem;">Version 1.0.0 • Laravel 13 + PHP 8.3</span>
         </div>
     </div>
 </footer>
